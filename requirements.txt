@@ -1,4 +1,6 @@
 django
+django-heroku
 flask
+gunicorn
 dropbox2==1.7.1
 docx2txt==0.8
