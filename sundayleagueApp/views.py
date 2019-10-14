@@ -4,6 +4,7 @@ from sundayleagueApp.models import *
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import services.FixturesServices as FixturesServices
+from collections import defaultdict
 
 
 # Create your views here.
@@ -13,9 +14,13 @@ def index(request):
 
 def fixtures(request, league):
     if request.method == 'GET':
-        print(league)
-        # matches = Match.objects.all().filter()
-        return render(request, 'fixtures.html')
+        # rounds = Round.objects.filter(league_number=league)
+        all_rounds = Round.objects.all()
+        rounds_group_by = defaultdict(list)
+        [rounds_group_by[r.league_number].append(r) for r in all_rounds]
+        print(rounds_group_by)
+        matches = Match.objects.all()
+        return render(request, 'fixtures.html', {'matches': matches})
 
 
 @csrf_exempt

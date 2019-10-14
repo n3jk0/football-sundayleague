@@ -82,7 +82,7 @@ def save_matches():
         index = fixtures_text.index(match, prev_index)
         if index - prev_index > LEAGUE_THRESHOLD:
             current_league += 1
-            # increased in nex if
+            # increased in next if
             round_num = 0
 
         if index - prev_index > ROUND_THRESHOLD:
