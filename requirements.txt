@@ -3,5 +3,4 @@ django-heroku
 flask
 dj_database_url
 gunicorn
-dropbox2==1.7.1
 docx2txt==0.8

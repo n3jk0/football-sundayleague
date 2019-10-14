@@ -29,3 +29,21 @@ class Match(models.Model):
 
     def __str__(self):
         return "{} - {}".format(self.first_team.__str__(), self.second_team.__str__())
+
+
+class Result(models.Model):
+    match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    first_team_score = models.IntegerField(default=0)
+    second_team_score = models.IntegerField(default=0)
+
+    def __str__(self):
+        return "{} : {}".format(self.first_team_score.__str__(), self.second_team_score.__str__())
+
+
+class File(models.Model):
+    file_name = models.CharField(max_length=200)
+    file_content = models.FileField(blank=False)
+
+    def __str__(self):
+        return self.file_name
+
