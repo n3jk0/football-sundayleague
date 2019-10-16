@@ -12,7 +12,8 @@ admin.autodiscover()
 urlpatterns = [
     path('', views.index, name='index'),
     url(r'^fixtures/(?P<league>[1-9]+)/$', views.fixtures, name='fixtures'),
-    path('teams/', views.teams, name="teams-all")
+    path('teams/', views.teams, name="teams-all"),
+    path('results/', views.results, name="all-results")
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # urlpatterns += staticfiles_urlpatterns()

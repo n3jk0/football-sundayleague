@@ -8,12 +8,13 @@ from difflib import SequenceMatcher
 
 ROUND_THRESHOLD = 65
 LEAGUE_THRESHOLD = 200
-TEAM_NAME_SIMILARITY = 0.75
+TEAM_NAME_SIMILARITY = 0.7
 
 MATCH_HOURS = ['8:30', '9:40', '10:50', '12:00', '13:10', '14:20']
 
 
 # todo: more seasons
+# todo: go trough File model instead of media dir
 def get_fixtures_text():
     for _, dirfile, files in walk('media/'):
         for file in files:
@@ -42,10 +43,8 @@ def save_teams():
 def find_almost_same_name(all_team_names, team_name):
     for name in all_team_names:
         r = SequenceMatcher(a=name, b=team_name).ratio()
-        # print(name, team_name, r)
         if r > TEAM_NAME_SIMILARITY:
             return name
-    # print("NOT FOUND", team_name)
     return ""
 
 

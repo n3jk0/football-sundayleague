@@ -4,6 +4,7 @@ from sundayleagueApp.models import *
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import services.FixturesServices as FixturesServices
+import services.ResultsService as ResultsService
 from collections import defaultdict
 
 LEAGUE_PREFIX = 'league_'
@@ -26,6 +27,7 @@ def fixtures(request, league):
         return render(request, 'fixtures.html', {'matches': matches_group_by_rounds, 'rounds': rounds_group_by_league})
 
 
+# todo: basic auth
 @csrf_exempt
 def teams(request):
     if request.method == 'GET':
@@ -44,3 +46,10 @@ def teams(request):
         return HttpResponse("DONE")
     else:
         return HttpResponse("Wrong method!")
+
+
+@csrf_exempt
+def results(request):
+    if request.method == 'POST':
+        ResultsService.get_results()
+        return HttpResponse("DONE")
