@@ -1,8 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
             integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
             crossorigin="anonymous"></script>
@@ -10,13 +13,36 @@
     <title>Razpored</title>
 </head>
 <body>
-<h2>Razpored:</h2>
-
-{% for match in matches %}
-    <div class="shadow p-3 mb-5 bg-white rounded">
-        <p>{{ match.round }}</p>
-        <p>{{ match.first_team }} - {{ match.second_team }} ({{ match.time }})</p>
-    </div>
-{% endfor %}
+<div class="bg"></div>
+<div class="container">
+    <h2>Razpored:</h2>
+    {% for league, rounds_list in rounds.items %}
+        <div class="shadow p-3 mb-5 bg-primary rounded">
+            <h2>{{ league }}</h2>
+            {% for r in rounds_list %}
+                <div class="shadow p-3 mb-5 bg-white rounded">
+                    {% for key, match_list in matches.items %}
+                        {# todo: get by key (maybe some method in python) #}
+                        {% if key == r.id %}
+                            <h4>{{ r }}</h4>
+                            <table class="table">
+                                <tbody>
+                                {% for match in match_list %}
+                                    <tr>
+                                        <td>{{ match.time|date:'H:i' }}</td>
+                                        <td class="text-right">{{ match.first_team }}</td>
+                                        <td class="text-center">? -?</td>
+                                        <td>{{ match.second_team }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
 </body>
 </html>

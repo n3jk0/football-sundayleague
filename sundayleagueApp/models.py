@@ -17,8 +17,8 @@ class Round(models.Model):
     home_team = models.ForeignKey(Team, on_delete=models.CASCADE)
 
     def __str__(self):
-        return "KROG. {} (liga {}) - {} ({})".format(
-            self.round_number, self.league_number, self.place, self.home_team.__str__())
+        return "KROG. {} - {} ({})".format(
+            self.round_number, self.place, self.home_team.__str__())
 
 
 class Match(models.Model):

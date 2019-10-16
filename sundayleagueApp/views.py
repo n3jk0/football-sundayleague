@@ -6,6 +6,8 @@ from django.views.decorators.csrf import csrf_exempt
 import services.FixturesServices as FixturesServices
 from collections import defaultdict
 
+LEAGUE_PREFIX = 'league_'
+
 
 # Create your views here.
 def index(request):
@@ -14,13 +16,14 @@ def index(request):
 
 def fixtures(request, league):
     if request.method == 'GET':
-        # rounds = Round.objects.filter(league_number=league)
-        all_rounds = Round.objects.all()
-        rounds_group_by = defaultdict(list)
-        [rounds_group_by[r.league_number].append(r) for r in all_rounds]
-        print(rounds_group_by)
-        matches = Match.objects.all()
-        return render(request, 'fixtures.html', {'matches': matches})
+        all_rounds = Round.objects.filter(league_number=league)
+        rounds_group_by_league = {}
+        [rounds_group_by_league.setdefault(LEAGUE_PREFIX + str(r.league_number), []).append(r) for r in all_rounds]
+        all_matches = Match.objects.all()
+        matches_group_by_rounds = {}
+        [matches_group_by_rounds.setdefault(m.round_id, []).append(m) for m in all_matches]
+        # print(matches_group_by_rounds)
+        return render(request, 'fixtures.html', {'matches': matches_group_by_rounds, 'rounds': rounds_group_by_league})
 
 
 @csrf_exempt
