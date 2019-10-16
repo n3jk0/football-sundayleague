@@ -1,0 +1,12 @@
+.bg {
+  /* The image used */
+  background-image: url("soccer_background.43386d5fab3b.jpg");
+
+  /* Full height */
+  height: 100%;
+
+  /* Center and scale the image nicely */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
