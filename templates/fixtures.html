@@ -11,13 +11,23 @@
             crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <title>Razpored</title>
+    <base href="http://{{ request.get_host }}/"/>
 </head>
 <body>
 <div class="bg">
-    <div class="d-flex justify-content-between">
-        <div>RIGHT</div>
-        <div class="container">
-            <h2 class="text-white text-center">Razpored:</h2>
+    <div class="d-flex p-3 justify-content-center">
+        <div class="pt-5 p-2">
+            <div class="list-group">
+                <button type="button" class="btn btn-light btn-lg" disabled>
+                    Lige:
+                </button>
+                <a href="fixtures/1/" role="button" class="btn btn-secondary btn-lg">Liga 1</a>
+                <a href="fixtures/2/" role="button" class="btn btn-secondary btn-lg">Liga 2</a>
+                <a href="fixtures/3/" role="button" class="btn btn-secondary btn-lg">Liga 3</a>
+                <a href="fixtures/4/" role="button" class="btn btn-secondary btn-lg">Liga 4</a>
+            </div>
+        </div>
+        <div>
             {% for league, rounds_list in rounds.items %}
                 <div class="shadow p-3 mb-5 bg-light rounded">
                     <h2>Liga {{ league|slice:"-1:" }}</h2>
@@ -34,7 +44,8 @@
                                             <tr>
                                                 <td style="width: 5%">{{ match.time|date:'H:i' }}</td>
                                                 <td class="text-right" style="width: 30%">{{ match.first_team }}</td>
-                                                <td class="text-center" style="width: 5%">{{ match.first_team_score }} - {{ match.second_team_score }}</td>
+                                                <td class="text-center" style="width: 20px">{{ match.first_team_score }}
+                                                    - {{ match.second_team_score }}</td>
                                                 <td style="width: 30%">{{ match.second_team }}</td>
                                             </tr>
                                         {% endfor %}

@@ -12,7 +12,7 @@ LEAGUE_PREFIX = 'league_'
 
 # Create your views here.
 def index(request):
-    return render(request, 'index.html')
+    return fixtures(request, 1)
 
 
 def fixtures(request, league):
@@ -23,7 +23,6 @@ def fixtures(request, league):
         all_matches = Match.objects.all()
         matches_group_by_rounds = {}
         [matches_group_by_rounds.setdefault(m.round_id, []).append(m) for m in all_matches]
-        # print(matches_group_by_rounds)
         return render(request, 'fixtures.html', {'matches': matches_group_by_rounds, 'rounds': rounds_group_by_league})
 
 
