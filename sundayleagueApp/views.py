@@ -20,7 +20,7 @@ def fixtures(request, league):
         all_rounds = Round.objects.filter(league_number=league)
         rounds_group_by_league = {}
         [rounds_group_by_league.setdefault(LEAGUE_PREFIX + str(r.league_number), []).append(r) for r in all_rounds]
-        all_matches = Match.objects.all()
+        all_matches = Match.objects.all().order_by("time")
         matches_group_by_rounds = {}
         [matches_group_by_rounds.setdefault(m.round_id, []).append(m) for m in all_matches]
         return render(request, 'fixtures.html', {'matches': matches_group_by_rounds, 'rounds': rounds_group_by_league})
