@@ -52,3 +52,8 @@ def results(request):
     if request.method == 'POST':
         ResultsService.get_results()
         return HttpResponse("DONE")
+
+
+def fill_table(request):
+    if request.method == 'POST':
+        return HttpResponse("DONE")

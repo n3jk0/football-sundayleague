@@ -4,6 +4,7 @@ from django.db import models
 # Create your models here.
 class Team(models.Model):
     name = models.CharField(max_length=200)
+    league = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -40,3 +41,18 @@ class File(models.Model):
 
     def __str__(self):
         return "{} (prebrano: {})".format(self.file_content.name, self.already_read)
+
+
+class TableRow(models.Model):
+    team = models.OneToOneField(Team, on_delete=models.CASCADE, unique=True)
+    league = models.IntegerField(default=1)
+    match_played = models.IntegerField(default=0)
+    wins = models.IntegerField(default=0)
+    draws = models.IntegerField(default=0)
+    losses = models.IntegerField(default=0)
+    goals_for = models.IntegerField(default=0)
+    goals_against = models.IntegerField(default=0)
+    points = models.IntegerField(default=0)
+
+    def __str__(self):
+        return "{} ({})".format(self.team, self.points)

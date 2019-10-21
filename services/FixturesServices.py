@@ -93,8 +93,16 @@ def save_matches():
 
         first_team_name = find_almost_same_name(team_names, match_split[0])
         first_team = Team.objects.get(name=first_team_name)
+        if first_team.league < 1:
+            first_team.league = current_league
+            first_team.save()
+
         second_team_name = find_almost_same_name(team_names, match_split[1])
         second_team = Team.objects.get(name=second_team_name)
+        if second_team.league < 1:
+            second_team.league = current_league
+            second_team.save()
+
         time = datetime.datetime.strptime(MATCH_HOURS[time_id], '%H:%M')
         print(round_num, current_league, first_team_name, second_team_name)
         football_round = Round.objects.get(round_number=round_num, league_number=current_league)

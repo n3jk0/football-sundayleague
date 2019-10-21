@@ -5,7 +5,6 @@ import re
 
 from services.FixturesServices import find_almost_same_name
 from sundayleagueApp.models import *
-import datetime
 
 ROUND_THRESHOLD = 65
 LEAGUE_THRESHOLD = 200
@@ -74,8 +73,59 @@ def get_results():
             league_num += 1
         results_text = get_results_text()
 
-    # print(league_indexes)
-    # league_blocks = re.findall("[1-9. ]+KROG", results_text)
-    # print(results_text)
 
-# print(get_results())
+def fill_table():
+    matches = Match.objects.exclude(first_team_score__isnull=True).exclude(second_team_score__isnull=True).all()
+    if len(matches) < 1:
+        return {}
+
+    matches_grouped_by_team = {}
+    for m in matches:
+        matches_grouped_by_team.setdefault(m.first_team_id, []).append(m)
+        matches_grouped_by_team.setdefault(m.second_team_id, []).append(m)
+    teams = Team.objects.all()
+
+    response = {}
+
+    for team in teams:
+        row, created = TableRow.objects.get_or_create(team=team)
+        # clean
+        if not created:
+            row.match_played = 0
+            row.wins = 0
+            row.losses = 0
+            row.draws = 0
+            row.goals_against = 0
+            row.goals_for = 0
+            row.points = 0
+        # else:
+            # row.league =
+
+        matches_for_team = matches_grouped_by_team[team]
+        for match in matches_for_team:
+            if match.first_team_id == team.id:
+                res = match.first_team_score - match.second_team_score
+                row.goals_for = match.first_team_score
+                row.goals_against = match.second_team_score
+            elif match.second_team_id == team.id:
+                res = match.second_team_score - match.first_team_score
+                row.goals_for = match.second_team_score
+                row.goals_against = match.first_team_score
+            else:
+                print("Shouldn't get there ({})".format(team))
+                return
+
+            row.match_played += 1
+            # res > 0 win ; res == 0 draw ; res < 0 loss
+            if res > 0:
+                row.wins += 1
+                row.points += 3
+            elif res < 0:
+                row.losses += 1
+            else:
+                row.draws += 1
+                row.points += 1
+        row.save()
+
+
+
