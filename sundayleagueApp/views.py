@@ -23,10 +23,13 @@ def fixtures(request, league):
         all_matches = Match.objects.all().order_by("time")
         matches_group_by_rounds = {}
         [matches_group_by_rounds.setdefault(m.round_id, []).append(m) for m in all_matches]
-        return render(request, 'fixtures.html', {'matches': matches_group_by_rounds, 'rounds': rounds_group_by_league})
+        table_rows = TableRow.objects.filter(league=league).order_by('-points').all()
+        return render(request, 'fixtures.html',
+                      {'matches': matches_group_by_rounds, 'rounds': rounds_group_by_league, 'table_rows': table_rows})
 
 
 # todo: basic auth
+# todo: call this commands from admin page
 @csrf_exempt
 def teams(request):
     if request.method == 'GET':
@@ -54,6 +57,15 @@ def results(request):
         return HttpResponse("DONE")
 
 
+@csrf_exempt
+def results_text(request):
+    if request.method == 'GET':
+        text = ResultsService.get_results_text()
+        return HttpResponse(text)
+
+
+@csrf_exempt
 def fill_table(request):
     if request.method == 'POST':
+        ResultsService.fill_table()
         return HttpResponse("DONE")

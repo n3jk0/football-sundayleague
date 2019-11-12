@@ -35,7 +35,7 @@ class Match(models.Model):
 
 
 class File(models.Model):
-    round_number = models.IntegerField(default=-1)
+    is_fixture = models.BooleanField(default=False)
     already_read = models.BooleanField(default=False)
     file_content = models.FileField(blank=False)
 
@@ -55,4 +55,4 @@ class TableRow(models.Model):
     points = models.IntegerField(default=0)
 
     def __str__(self):
-        return "{} ({})".format(self.team, self.points)
+        return "{} (GD:{} PT:{})".format(self.team, (self.goals_for - self.goals_against), self.points)

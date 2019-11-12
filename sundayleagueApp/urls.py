@@ -13,7 +13,9 @@ urlpatterns = [
     path('', views.index, name='index'),
     url(r'^fixtures/(?P<league>[1-9]+)/$', views.fixtures, name='fixtures'),
     path('teams/', views.teams, name="teams-all"),
-    path('results/', views.results, name="all-results")
+    path('results/', views.results, name="all-results"),
+    path('resultstext/', views.results_text, name="all-resultstext"),
+    path('table/', views.fill_table, name="fill-table")
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # urlpatterns += staticfiles_urlpatterns()

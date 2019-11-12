@@ -12,28 +12,42 @@ TEAM_NAME_SIMILARITY = 0.7
 
 
 def get_results_text():
-    biltens = File.objects.filter(already_read=False, round_number__gt=0)
-    biltens_names = [bilten.file_content.name for bilten in biltens]
+    biltens = File.objects.filter(already_read=False, is_fixture=False).all()
+    # biltens_names = [bilten.file_content.name for bilten in biltens]
     # for _, dirfile, files in walk('../media/'):
-    for _, dirfile, files in walk('media/'):
-        for file in files:
-            if file in biltens_names:
-                # if file.startswith("bilten"):
-                #     file_name = '../media/' + file
-                file_name = 'media/' + file
-                with open(file_name, 'rb') as f:
-                    print("Start reading file", file_name)
-                    doc = BytesIO(f.read())
-                    text = docx2txt.process(doc)
-                    text = re.sub(r'[\n\t]+', '\n', text)
-                    text = re.sub(r'Š', 'S', text)
-                    text = re.sub(r'Ž', 'Z', text)
-                    text = re.sub(r'Č', 'C', text)
-                    text = re.sub(r'–', '-', text)
-                    f = File.objects.get(file_content=file)
-                    f.already_read = True
-                    f.save()
-                    return text
+    # for _, dirfile, files in walk('media/'):
+    #     for file in files:
+    #         if file in biltens_names:
+    #             # if file.startswith("bilten"):
+    #             #     file_name = '../media/' + file
+    #             file_name = 'media/' + file
+    #             with open(file_name, 'rb') as f:
+    #                 print("Start reading file", file_name)
+    #                 doc = BytesIO(f.read())
+    #                 text = docx2txt.process(doc)
+    #                 text = re.sub(r'[\n\t]+', '\n', text)
+    #                 text = re.sub(r'Š', 'S', text)
+    #                 text = re.sub(r'Ž', 'Z', text)
+    #                 text = re.sub(r'Č', 'C', text)
+    #                 text = re.sub(r'–', '-', text)
+    #                 f = File.objects.get(file_content=file)
+    #                 f.already_read = True
+    #                 f.save()
+    #                 return text
+    for bilten in biltens:
+        with bilten.file_content.open(mode='rb') as f:
+            print("Start reading file", bilten.file_content.name)
+            doc = BytesIO(f.read())
+            text = docx2txt.process(doc)
+            text = re.sub(r'[\n\t]+', '\n', text)
+            text = re.sub(r'Š', 'S', text)
+            text = re.sub(r'Ž', 'Z', text)
+            text = re.sub(r'Č', 'C', text)
+            text = re.sub(r'–', '-', text)
+            f = File.objects.get(file_content=bilten.file_content)
+            f.already_read = True
+            f.save()
+            return text
     return ""
 
 
@@ -89,6 +103,7 @@ def fill_table():
 
     for team in teams:
         row, created = TableRow.objects.get_or_create(team=team)
+        print(row, created)
         # clean
         if not created:
             row.match_played = 0
@@ -98,19 +113,20 @@ def fill_table():
             row.goals_against = 0
             row.goals_for = 0
             row.points = 0
-        # else:
-            # row.league =
+        else:
+            row.team = team
+            row.league = team.league
 
-        matches_for_team = matches_grouped_by_team[team]
+        matches_for_team = matches_grouped_by_team[team.id]
         for match in matches_for_team:
             if match.first_team_id == team.id:
                 res = match.first_team_score - match.second_team_score
-                row.goals_for = match.first_team_score
-                row.goals_against = match.second_team_score
+                row.goals_for += match.first_team_score
+                row.goals_against += match.second_team_score
             elif match.second_team_id == team.id:
                 res = match.second_team_score - match.first_team_score
-                row.goals_for = match.second_team_score
-                row.goals_against = match.first_team_score
+                row.goals_for += match.second_team_score
+                row.goals_against += match.first_team_score
             else:
                 print("Shouldn't get there ({})".format(team))
                 return
@@ -126,6 +142,5 @@ def fill_table():
                 row.draws += 1
                 row.points += 1
         row.save()
-
-
+    return response
 
