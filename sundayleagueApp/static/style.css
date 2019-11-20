@@ -1,13 +1,10 @@
-.bg {
-  /* The image used */
-  background-image: url("soccer_background.jpg");
-  background-attachment: fixed;
-
-  /* Full height */
+/*todo: some background picture*/
+body, html {
   height: 100%;
+  margin: 0;
+}
 
-  /* Center and scale the image nicely */
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
+.bg {
+    background-color: currentColor;
+    min-height: 100%;
 }

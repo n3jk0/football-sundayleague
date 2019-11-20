@@ -17,6 +17,7 @@ def index(request):
 
 def fixtures(request, league):
     if request.method == 'GET':
+        selected_round = request.GET.get('round')
         all_rounds = Round.objects.filter(league_number=league)
         rounds_group_by_league = {}
         [rounds_group_by_league.setdefault(LEAGUE_PREFIX + str(r.league_number), []).append(r) for r in all_rounds]
@@ -25,7 +26,16 @@ def fixtures(request, league):
         [matches_group_by_rounds.setdefault(m.round_id, []).append(m) for m in all_matches]
         table_rows = TableRow.objects.filter(league=league).order_by('-points').all()
         return render(request, 'fixtures.html',
-                      {'matches': matches_group_by_rounds, 'rounds': rounds_group_by_league, 'table_rows': table_rows})
+                      {'matches': matches_group_by_rounds, 'rounds': rounds_group_by_league, 'table_rows': table_rows,
+                       'fixtures_class': 'btn-light', 'standing_class': 'btn-secondary',
+                       'selected_round': selected_round})
+
+
+def standing(request, league):
+    if request.method == 'GET':
+        table_rows = TableRow.objects.filter(league=league).order_by('-points').all()
+        return render(request, 'standing.html',
+                      {'table_rows': table_rows, 'fixtures_class': 'btn-secondary', 'standing_class': 'btn-light'})
 
 
 # todo: basic auth
