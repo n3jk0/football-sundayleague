@@ -22,8 +22,8 @@ def fixtures(request, league):
         all_rounds = Round.objects.filter(league_number=league)
         if selected_round is None:
             today = datetime.date.today()
-            today_plus_2 = today + datetime.timedelta(days=2)
-            last_round = all_rounds.order_by('date').filter(date__lte=today_plus_2).last()
+            today_plus_4 = today + datetime.timedelta(days=4)
+            last_round = all_rounds.order_by('date').filter(date__lte=today_plus_4).last()
             return redirect(request.path + "?round=" + str(last_round.round_number))
         filter_rounds = all_rounds
         if selected_round != 'all':
