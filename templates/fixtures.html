@@ -41,18 +41,16 @@
                 <a class="btn btn-secondary dropdown-toggle float-right" href="#" role="button" id="dropdownMenuLink"
                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     {% if selected_round == None %}
-                        Vsi
+                        Vsi krogi
+                    {% else %}
+                        Krog {{ selected_round }}
                     {% endif %}
-                    Krog {{ selected_round }}
                 </a>
 
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                    {% for _, round_list in rounds.items %}
-                        {% for round in round_list %}
-                            <a class="dropdown-item"
-{#                               todo: just base path#}
-                               href="{{ request.get_full_path }}?round={{ round.round_number }}">{{ round }}</a>
-                        {% endfor %}
+                    <a class="dropdown-item" href="{{ request.path }}?round=all">Vsi krogi</a>
+                    {% for round in all_rounds %}
+                        <a class="dropdown-item" href="{{ request.path }}?round={{ round.round_number }}">{{ round }}</a>
                     {% endfor %}
                 </div>
             </div>
