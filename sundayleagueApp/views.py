@@ -37,14 +37,15 @@ def fixtures(request, league):
         return render(request, 'fixtures.html',
                       {'matches': matches_group_by_rounds, 'rounds': rounds_group_by_league, 'all_rounds': all_rounds,
                        'table_rows': table_rows, 'fixtures_class': 'btn-light', 'standing_class': 'btn-secondary',
-                       'selected_round': selected_round})
+                       'selected_round': selected_round, 'selected_league': league})
 
 
 def standing(request, league):
     if request.method == 'GET':
         table_rows = TableRow.objects.filter(league=league).order_by('-points').all()
         return render(request, 'standing.html',
-                      {'table_rows': table_rows, 'fixtures_class': 'btn-secondary', 'standing_class': 'btn-light'})
+                      {'table_rows': table_rows, 'fixtures_class': 'btn-secondary', 'standing_class': 'btn-light',
+                       'selected_league': league})
 
 
 # todo: basic auth
