@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from sundayleagueApp.models import *
 from django.http import JsonResponse
@@ -77,12 +77,17 @@ def teams(request):
 @csrf_exempt
 def results(request, file_id=-1):
     if request.method == 'POST':
-        if int(file_id) > 0:
-            saved_results = ResultsService.save_results_for_file(file_id)
-            return HttpResponse("{} saved results for file: {}".format(len(saved_results), file_id))
+        if request.user.is_authenticated:
+            if int(file_id) > 0:
+                saved_results = ResultsService.save_results_for_file(file_id)
+                print("{} saved results for file: {}".format(len(saved_results), file_id))
+                return redirect("/admin/sundayleagueApp/file/")
 
-        ResultsService.save_results()
-        return HttpResponse("Save all results")
+            ResultsService.save_results()
+            print("Save all results")
+            return redirect("admin/sundayleagueApp/file/")
+        else:
+            return HttpResponse("Not authenticated", status=403)
     else:
         return HttpResponse("Wrong method!", status=405)
 

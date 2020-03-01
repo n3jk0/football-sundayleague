@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 
 
@@ -35,6 +37,7 @@ class Match(models.Model):
 
 
 class File(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     is_fixture = models.BooleanField(default=False)
     already_read = models.BooleanField(default=False)
     file_content = models.FileField(blank=False)
