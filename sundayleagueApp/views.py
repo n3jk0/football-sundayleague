@@ -38,6 +38,8 @@ def fixtures(request, league):
                       {'matches': matches_group_by_rounds, 'rounds': rounds_group_by_league, 'all_rounds': all_rounds,
                        'table_rows': table_rows, 'fixtures_class': 'btn-light', 'standing_class': 'btn-secondary',
                        'selected_round': selected_round, 'selected_league': league})
+    else:
+        return HttpResponse("Wrong method!", status=405)
 
 
 def standing(request, league):
@@ -46,10 +48,13 @@ def standing(request, league):
         return render(request, 'standing.html',
                       {'table_rows': table_rows, 'fixtures_class': 'btn-secondary', 'standing_class': 'btn-light',
                        'selected_league': league})
+    else:
+        return HttpResponse("Wrong method!", status=405)
 
 
 # todo: basic auth
 # todo: call this commands from admin page
+# todo: rename to fixtures
 @csrf_exempt
 def teams(request):
     if request.method == 'GET':
@@ -64,24 +69,35 @@ def teams(request):
         FixturesServices.save_rounds()
         FixturesServices.save_matches()
 
-        # todo: redirect to get
         return HttpResponse("DONE")
     else:
-        return HttpResponse("Wrong method!")
+        return HttpResponse("Wrong method!", status=405)
 
 
 @csrf_exempt
-def results(request):
+def results(request, file_id=-1):
     if request.method == 'POST':
-        ResultsService.get_results()
-        return HttpResponse("DONE")
+        if int(file_id) > 0:
+            saved_results = ResultsService.save_results_for_file(file_id)
+            return HttpResponse("{} saved results for file: {}".format(len(saved_results), file_id))
+
+        ResultsService.save_results()
+        return HttpResponse("Save all results")
+    else:
+        return HttpResponse("Wrong method!", status=405)
 
 
 @csrf_exempt
-def results_text(request):
+def results_text(request, file_id=-1):
     if request.method == 'GET':
+        if int(file_id) > 0:
+            text = ResultsService.get_results_text_by_id(file_id)
+            return HttpResponse(text)
+
         text = ResultsService.get_results_text()
         return HttpResponse(text)
+    else:
+        return HttpResponse("Wrong method!", status=405)
 
 
 @csrf_exempt
@@ -89,3 +105,5 @@ def fill_table(request):
     if request.method == 'POST':
         ResultsService.fill_table()
         return HttpResponse("DONE")
+    else:
+        return HttpResponse("Wrong method!", status=405)
