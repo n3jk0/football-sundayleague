@@ -40,11 +40,12 @@ class FileAdmin(admin.ModelAdmin):
         if not obj.is_fixture:
             if obj.already_read or obj.id is None:
                 # disabled button
-                return format_html("<a class=\"button\" disabled>Uvozi</a>")
-
+                return format_html("<a class=\"button\" disabled>Uvozi rezultate</a>")
             return format_html("<a class=\"button\" href=\"/results/{}/\" >Uvozi razultate</a>", obj.id)
         else:
-            # todo
-            return ""
+            if obj.already_read or obj.id is None:
+                # disabled button
+                return format_html("<a class=\"button\" disabled>Uvozi razpored</a>")
+            return format_html("<a class=\"button\" href=\"/uploadfixtures/\" onclick='return confirm(\"Shranjevanje lahko traja nekaj časa. Ste prepričani da želite nadeljevati?\");'>Uvozi razpored</a>",)
 
     file_actions.short_description = "Uvozi datoteko"

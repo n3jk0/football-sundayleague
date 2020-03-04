@@ -55,24 +55,21 @@ def standing(request, league):
         return HttpResponse("Wrong method!", status=405)
 
 
-# todo: basic auth
-# todo: call this commands from admin page
-# todo: rename to fixtures
 @csrf_exempt
-def teams(request):
-    if request.method == 'GET':
-        all_teams = Team.objects.all()
-        teams_json = {}
-        for i, team in enumerate(all_teams):
-            teams_json[i] = team.name
-        return JsonResponse(teams_json)
-    elif request.method == 'POST':
-        print("I'm in")
-        FixturesServices.save_teams()
-        FixturesServices.save_rounds()
-        FixturesServices.save_matches()
-
-        return HttpResponse("DONE")
+def uploadfixtures(request):
+    # maybe not the best solution to allow GET method here
+    if request.method == 'GET' or request.method == 'POST':
+        if request.user.is_authenticated:
+            saved_teams = FixturesServices.save_teams()
+            messages.success(request, "{} ekip je bilo shranjenih.".format(len(saved_teams)))
+            FixturesServices.save_rounds()
+            FixturesServices.save_matches()
+            messages.success(request, "Razpored je bil dodan.")
+            response = redirect("/admin/sundayleagueApp/file/")
+            response.status_code = 303
+            return response
+        else:
+            return HttpResponse("Not authenticated", status=403)
     else:
         return HttpResponse("Wrong method!", status=405)
 
@@ -85,7 +82,8 @@ def results(request, file_id=-1):
             if int(file_id) > 0:
                 saved_results = ResultsService.save_results_for_file(file_id)
                 messages.success(request, "{} rezultatov je bilo vnesenih.".format(len(saved_results)))
-                print("{} saved results for file: {}".format(len(saved_results), file_id))
+                ResultsService.fill_table()
+                messages.success(request, "Lestvica je bila posodobljena.")
                 response = redirect("/admin/sundayleagueApp/file/")
                 response.status_code = 303
                 return response
