@@ -26,6 +26,7 @@ class FileAdmin(admin.ModelAdmin):
     readonly_fields = (
         'id',
         'uuid',
+        'file_actions',
     )
 
     def get_urls(self):
@@ -36,9 +37,14 @@ class FileAdmin(admin.ModelAdmin):
         return urls + custom_urls
 
     def file_actions(self, obj):
-        disabled = ""
-        if obj.already_read:
-            disabled = "disabled"
-        return format_html('<form action="/results/{}/" method="post"><button type="submit" class="button" {}>Uvozi</button></form>', obj.uuid, disabled)
+        if not obj.is_fixture:
+            if obj.already_read or obj.id is None:
+                # disabled button
+                return format_html("<a class=\"button\" disabled>Uvozi</a>")
+
+            return format_html("<a class=\"button\" href=\"/results/{}/\" >Uvozi razultate</a>", obj.id)
+        else:
+            # todo
+            return ""
 
     file_actions.short_description = "Uvozi datoteko"

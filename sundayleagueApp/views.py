@@ -1,11 +1,14 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import render
 from sundayleagueApp.models import *
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
+
 import services.FixturesServices as FixturesServices
 import services.ResultsService as ResultsService
 from django.shortcuts import redirect
+
 import datetime
 
 LEAGUE_PREFIX = 'league_'
@@ -76,16 +79,20 @@ def teams(request):
 
 @csrf_exempt
 def results(request, file_id=-1):
-    if request.method == 'POST':
+    # maybe not the best solution to allow GET method here
+    if request.method == 'POST' or request.method == 'GET':
         if request.user.is_authenticated:
             if int(file_id) > 0:
                 saved_results = ResultsService.save_results_for_file(file_id)
+                messages.success(request, "{} rezultatov je bilo vnesenih.".format(len(saved_results)))
                 print("{} saved results for file: {}".format(len(saved_results), file_id))
-                return redirect("/admin/sundayleagueApp/file/")
+                response = redirect("/admin/sundayleagueApp/file/")
+                response.status_code = 303
+                return response
 
             ResultsService.save_results()
             print("Save all results")
-            return redirect("admin/sundayleagueApp/file/")
+            return redirect("/admin/sundayleagueApp/file/")
         else:
             return HttpResponse("Not authenticated", status=403)
     else:
