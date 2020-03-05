@@ -1,70 +1,53 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+{% extends 'base.html' %}
 
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-            crossorigin="anonymous"></script>
-    <meta charset="UTF-8">
-    <title>Lestvica</title>
-    <base href="http://{{ request.get_host }}/"/>
-</head>
-<body>
-<div class="bg">
-    <div class="d-flex p-3 justify-content-center">
-        <div class="pt-5 p-2">
-            <div class="list-group">
-                <button type="button" class="btn btn-light btn-lg" disabled>
-                    Lige:
-                </button>
-                <a href="standing/1/" role="button" class="btn btn-secondary btn-lg">Liga 1</a>
-                <a href="standing/2/" role="button" class="btn btn-secondary btn-lg">Liga 2</a>
-                <a href="standing/3/" role="button" class="btn btn-secondary btn-lg">Liga 3</a>
-                <a href="standing/4/" role="button" class="btn btn-secondary btn-lg">Liga 4</a>
-            </div>
-        </div>
-        <div class="pl-1">
-            <div>
-                <a href="fixtures/{{ selected_league }}/" role="button" class="btn {{ fixtures_class }} btn-lg">Rezultati</a>
-                <a href="standing/{{ selected_league }}/" role="button" class="btn {{ standing_class }} btn-lg">Lestvica</a>
-            </div>
-            <div class="shadow p-2 shadow bg-light rounded">
-                <h3>Lestvica:</h3>
-                <table class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Ekipa</th>
-                        <th class="text-center" scope="col">GP</th>
-                        <th class="text-center" scope="col">w</th>
-                        <th class="text-center" scope="col">D</th>
-                        <th class="text-center" scope="col">L</th>
-                        <th class="text-center" scope="col">GD</th>
-                        <th class="text-center" scope="col">PTS</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for row in table_rows %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ row.team }}</td>
-                            <td>{{ row.match_played }}</td>
-                            <td>{{ row.wins }}</td>
-                            <td>{{ row.draws }}</td>
-                            <td>{{ row.losses }}</td>
-                            <td>{{ row.goals_for }} : {{ row.goals_against }}</td>
-                            <td>{{ row.points }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+{% block title %} Lestvica {% endblock %}
+
+{% block navigation_buttons %}
+    <div class="list-group">
+        <button type="button" class="btn btn-light btn-lg" disabled>
+            Lige:
+        </button>
+        <a href="standing/1/" role="button" class="btn btn-secondary btn-lg">Liga 1</a>
+        <a href="standing/2/" role="button" class="btn btn-secondary btn-lg">Liga 2</a>
+        <a href="standing/3/" role="button" class="btn btn-secondary btn-lg">Liga 3</a>
+        <a href="standing/4/" role="button" class="btn btn-secondary btn-lg">Liga 4</a>
     </div>
-</div>
-</body>
-</html>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <a href="fixtures/{{ selected_league }}/" role="button" class="btn {{ fixtures_class }} btn-lg">Rezultati</a>
+        <a href="standing/{{ selected_league }}/" role="button" class="btn {{ standing_class }} btn-lg">Lestvica</a>
+    </div>
+    <div class="shadow p-2 shadow bg-light rounded">
+        <h3>Lestvica:</h3>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Ekipa</th>
+                <th class="text-center" scope="col">GP</th>
+                <th class="text-center" scope="col">w</th>
+                <th class="text-center" scope="col">D</th>
+                <th class="text-center" scope="col">L</th>
+                <th class="text-center" scope="col">GD</th>
+                <th class="text-center" scope="col">PTS</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in table_rows %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ row.team }}</td>
+                    <td>{{ row.match_played }}</td>
+                    <td>{{ row.wins }}</td>
+                    <td>{{ row.draws }}</td>
+                    <td>{{ row.losses }}</td>
+                    <td>{{ row.goals_for }} : {{ row.goals_against }}</td>
+                    <td>{{ row.points }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -1,116 +1,93 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+{% extends 'base.html' %}
 
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-            crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
-            integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
-            crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
-            integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
-            crossorigin="anonymous"></script>
-    <meta charset="UTF-8">
-    <title>Razpored</title>
-    <base href="http://{{ request.get_host }}/"/>
-</head>
-<body>
-{#todo: template #}
-<div class="bg">
-    <div class="d-flex p-3 justify-content-center">
-        <div class="pt-5 p-2">
-            <div class="list-group">
-                <button type="button" class="btn btn-light btn-lg" disabled>
-                    Lige:
-                </button>
-                <a href="fixtures/1/" role="button" class="btn btn-secondary btn-lg">Liga 1</a>
-                <a href="fixtures/2/" role="button" class="btn btn-secondary btn-lg">Liga 2</a>
-                <a href="fixtures/3/" role="button" class="btn btn-secondary btn-lg">Liga 3</a>
-                <a href="fixtures/4/" role="button" class="btn btn-secondary btn-lg">Liga 4</a>
-            </div>
+{% block title %} Razpored {% endblock %}
+
+{% block navigation_buttons %}
+    <div class="list-group">
+        <button type="button" class="btn btn-light btn-lg" disabled>
+            Lige:
+        </button>
+        <a href="fixtures/1/" role="button" class="btn btn-secondary btn-lg">Liga 1</a>
+        <a href="fixtures/2/" role="button" class="btn btn-secondary btn-lg">Liga 2</a>
+        <a href="fixtures/3/" role="button" class="btn btn-secondary btn-lg">Liga 3</a>
+        <a href="fixtures/4/" role="button" class="btn btn-secondary btn-lg">Liga 4</a>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <a href="fixtures/{{ selected_league }}/" role="button" class="btn {{ fixtures_class }} btn-lg">Rezultati</a>
+        <a href="standing/{{ selected_league }}/" role="button" class="btn {{ standing_class }} btn-lg">Lestvica</a>
+        <a class="btn btn-secondary dropdown-toggle float-right" href="#" role="button" id="dropdownMenuLink"
+           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            {% if selected_round == None %}
+                Vsi krogi
+            {% else %}
+                Krog {{ selected_round }}
+            {% endif %}
+        </a>
+
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+            <a class="dropdown-item" href="{{ request.path }}?round=all">Vsi krogi</a>
+            {% for round in all_rounds %}
+                <a class="dropdown-item" href="{{ request.path }}?round={{ round.round_number }}">{{ round }}</a>
+            {% endfor %}
         </div>
-        <div>
-            <div>
-                <a href="fixtures/{{ selected_league }}/" role="button" class="btn {{ fixtures_class }} btn-lg">Rezultati</a>
-                <a href="standing/{{ selected_league }}/" role="button" class="btn {{ standing_class }} btn-lg">Lestvica</a>
-                <a class="btn btn-secondary dropdown-toggle float-right" href="#" role="button" id="dropdownMenuLink"
-                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {% if selected_round == None %}
-                        Vsi krogi
-                    {% else %}
-                        Krog {{ selected_round }}
-                    {% endif %}
-                </a>
+    </div>
 
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                    <a class="dropdown-item" href="{{ request.path }}?round=all">Vsi krogi</a>
-                    {% for round in all_rounds %}
-                        <a class="dropdown-item" href="{{ request.path }}?round={{ round.round_number }}">{{ round }}</a>
-                    {% endfor %}
-                </div>
-            </div>
-
-            {% for league, rounds_list in rounds.items %}
-                <div class="shadow p-3 mb-5 bg-light rounded">
-                    <h2>Liga {{ league|slice:"-1:" }}</h2>
-                    {% for r in rounds_list %}
-                        <div class="shadow p-3 mb-5 bg-white rounded">
-                            {% for key, match_list in matches.items %}
-                                {# todo: get by key (maybe some method in python) #}
-                                {% if key == r.id %}
-                                    <h4>{{ r }}</h4>
-                                    <p>{{ r.date }}</p>
-                                    <table class="table table-striped">
-                                        <tbody>
-                                        {% for match in match_list %}
-                                            <tr>
-                                                <td style="width: 5%">{{ match.time|date:'H:i' }}</td>
-                                                <td class="text-right" style="width: 30%">{{ match.first_team }}</td>
-                                                <td class="text-center" style="width: 20px">{{ match.first_team_score }}
-                                                    - {{ match.second_team_score }}</td>
-                                                <td style="width: 30%">{{ match.second_team }}</td>
-                                            </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
+    {% for league, rounds_list in rounds.items %}
+        <div class="shadow p-3 mb-5 bg-light rounded">
+            <h2>Liga {{ league|slice:"-1:" }}</h2>
+            {% for r in rounds_list %}
+                <div class="shadow p-3 mb-5 bg-white rounded">
+                    {% for key, match_list in matches.items %}
+                        {# todo: get by key (maybe some method in python) #}
+                        {% if key == r.id %}
+                            <h4>{{ r }}</h4>
+                            <p>{{ r.date }}</p>
+                            <table class="table table-striped">
+                                <tbody>
+                                {% for match in match_list %}
+                                    <tr>
+                                        <td style="width: 5%">{{ match.time|date:'H:i' }}</td>
+                                        <td class="text-right" style="width: 30%">{{ match.first_team }}</td>
+                                        <td class="text-center" style="width: 20px">{{ match.first_team_score }}
+                                            - {{ match.second_team_score }}</td>
+                                        <td style="width: 30%">{{ match.second_team }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endif %}
                     {% endfor %}
                 </div>
             {% endfor %}
         </div>
-        <div class="pt-5 pl-1">
-            <div class="shadow p-2 shadow bg-light rounded">
-                <h3>Lestvica:</h3>
-                <table class="table table-sm">
-                    <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Ekipa</th>
-                        <th class="text-center" scope="col">GP</th>
-                        <th class="text-center" scope="col">PTS</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for row in table_rows %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ row.team }}</td>
-                            <td>{{ row.match_played }}</td>
-                            <td>{{ row.points }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block standing %}
+    <div class="shadow p-2 shadow bg-light rounded">
+        <h3>Lestvica:</h3>
+        <table class="table table-sm">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Ekipa</th>
+                <th class="text-center" scope="col">GP</th>
+                <th class="text-center" scope="col">PTS</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in table_rows %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ row.team }}</td>
+                    <td>{{ row.match_played }}</td>
+                    <td>{{ row.points }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
-</div>
-</body>
-</html>
+{% endblock %}
