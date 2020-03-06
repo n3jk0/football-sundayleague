@@ -23,7 +23,7 @@ def fixtures(request, league):
     if request.method == 'GET':
         selected_round = request.GET.get('round', None)
         selected_team_id = request.GET.get('team_id', None)
-        all_rounds = Round.objects.filter(league_number=league)
+        all_rounds = Round.objects.filter(league_number=league).order_by('date')
         if selected_round is None:
             today = datetime.date.today()
             today_plus_4 = today + datetime.timedelta(days=4)
