@@ -41,10 +41,11 @@ def fixtures(request, league):
         matches_group_by_rounds = {}
         [matches_group_by_rounds.setdefault(m.round_id, []).append(m) for m in all_matches]
         table_rows = TableRow.objects.filter(league=league).order_by('-points').all()
+        top_scorers = Player.objects.filter(team__league=league, goals__gt=0).order_by('goals')[:5]
         return render(request, 'fixtures.html',
                       {'matches': matches_group_by_rounds, 'rounds': rounds_group_by_league, 'all_rounds': all_rounds,
                        'table_rows': table_rows, 'fixtures_class': 'btn-light', 'standing_class': 'btn-secondary',
-                       'selected_round': selected_round, 'selected_league': league})
+                       'selected_round': selected_round, 'selected_league': league, 'top_scorers': top_scorers})
     else:
         return HttpResponse("Wrong method!", status=405)
 
@@ -52,9 +53,10 @@ def fixtures(request, league):
 def standing(request, league):
     if request.method == 'GET':
         table_rows = TableRow.objects.filter(league=league).order_by('-points').all()
+        top_scorers = Player.objects.filter(team__league=league, goals__gt=0).order_by('goals')[:5]
         return render(request, 'standing.html',
                       {'table_rows': table_rows, 'fixtures_class': 'btn-secondary', 'standing_class': 'btn-light',
-                       'selected_league': league})
+                       'selected_league': league, 'top_scorers': top_scorers})
     else:
         return HttpResponse("Wrong method!", status=405)
 

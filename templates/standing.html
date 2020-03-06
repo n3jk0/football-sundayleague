@@ -38,7 +38,9 @@
             {% for row in table_rows %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td><a style="color: black;" href="fixtures/{{ selected_league }}/?round=all&team_id={{ row.team.id }}">{{ row.team }}</a></td>
+                    <td><a style="color: black;"
+                           href="fixtures/{{ selected_league }}/?round=all&team_id={{ row.team.id }}">{{ row.team }}</a>
+                    </td>
                     <td>{{ row.match_played }}</td>
                     <td>{{ row.wins }}</td>
                     <td>{{ row.draws }}</td>
@@ -54,4 +56,32 @@
             </tbody>
         </table>
     </div>
+{% endblock %}
+
+{% block standing %}
+    {% if top_scorers|length > 0 %}
+        <div class="shadow p-2 shadow bg-light rounded">
+            <h3>Najbolši strelci:</h3>
+            <table class="table table-sm">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Igralec</th>
+                    <th scope="col">Ekipa</th>
+                    <th class="text-center" scope="col">G</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for player in top_scorers %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ player.first_name }} {{ player.family_name }}</td>
+                        <td>{{ player.team }}</td>
+                        <td>{{ player.goals }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
 {% endblock %}

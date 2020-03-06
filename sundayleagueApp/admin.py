@@ -12,6 +12,7 @@ admin.site.register(Team)
 admin.site.register(Match)
 admin.site.register(TableRow)
 
+admin.site.register(Player)
 
 @admin.register(File)
 class FileAdmin(admin.ModelAdmin):
