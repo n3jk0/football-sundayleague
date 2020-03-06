@@ -51,8 +51,13 @@
                                     <tr>
                                         <td style="width: 5%">{{ match.time|date:'H:i' }}</td>
                                         <td class="text-right" style="width: 30%">{{ match.first_team }}</td>
-                                        <td class="text-center" style="width: 20px">{{ match.first_team_score }}
-                                            - {{ match.second_team_score }}</td>
+                                        {% if match.is_surrendered %}
+                                            <td class="text-center" style="width: 20px">{{ match.first_team_score }}
+                                                - {{ match.second_team_score }} (b.b.)</td>
+                                        {% else %}
+                                            <td class="text-center" style="width: 20px">{{ match.first_team_score }}
+                                                - {{ match.second_team_score }}</td>
+                                        {% endif %}
                                         <td style="width: 30%">{{ match.second_team }}</td>
                                     </tr>
                                 {% endfor %}
@@ -82,7 +87,9 @@
             {% for row in table_rows %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td><a style="color: black;" href="fixtures/{{ selected_league }}/?round=all&team_id={{ row.team.id }}">{{ row.team }}</a></td>
+                    <td><a style="color: black;"
+                           href="fixtures/{{ selected_league }}/?round=all&team_id={{ row.team.id }}">{{ row.team }}</a>
+                    </td>
                     <td>{{ row.match_played }}</td>
                     {% if row.penalty_points < 0 %}
                         <td>{{ row.points }}({{ row.penalty_points }})</td>
