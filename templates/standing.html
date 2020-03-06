@@ -44,7 +44,11 @@
                     <td>{{ row.draws }}</td>
                     <td>{{ row.losses }}</td>
                     <td>{{ row.goals_for }} : {{ row.goals_against }}</td>
-                    <td>{{ row.points }}</td>
+                    {% if row.penalty_points < 0 %}
+                        <td>{{ row.points }} ({{ row.penalty_points }})</td>
+                    {% else %}
+                        <td>{{ row.points }}</td>
+                    {% endif %}
                 </tr>
             {% endfor %}
             </tbody>

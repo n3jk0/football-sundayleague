@@ -84,7 +84,11 @@
                     <td>{{ forloop.counter }}</td>
                     <td>{{ row.team }}</td>
                     <td>{{ row.match_played }}</td>
-                    <td>{{ row.points }}</td>
+                    {% if row.penalty_points < 0 %}
+                        <td>{{ row.points }}({{ row.penalty_points }})</td>
+                    {% else %}
+                        <td>{{ row.points }}</td>
+                    {% endif %}
                 </tr>
             {% endfor %}
             </tbody>

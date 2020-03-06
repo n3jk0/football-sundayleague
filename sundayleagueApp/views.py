@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 from sundayleagueApp.models import *
-from django.http import JsonResponse
+from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 
@@ -22,6 +22,7 @@ def index(request):
 def fixtures(request, league):
     if request.method == 'GET':
         selected_round = request.GET.get('round', None)
+        selected_team_id = request.GET.get('team_id', None)
         all_rounds = Round.objects.filter(league_number=league)
         if selected_round is None:
             today = datetime.date.today()
@@ -33,7 +34,10 @@ def fixtures(request, league):
             filter_rounds = filter_rounds.filter(league_number=league, round_number=selected_round)
         rounds_group_by_league = {}
         [rounds_group_by_league.setdefault(LEAGUE_PREFIX + str(r.league_number), []).append(r) for r in filter_rounds]
-        all_matches = Match.objects.all().order_by("time")
+        all_matches = Match.objects.order_by("time")
+        if selected_team_id is not None:
+            all_matches = all_matches.filter(Q(first_team_id=selected_team_id) | Q(second_team_id=selected_team_id))
+        all_matches = all_matches.all()
         matches_group_by_rounds = {}
         [matches_group_by_rounds.setdefault(m.round_id, []).append(m) for m in all_matches]
         table_rows = TableRow.objects.filter(league=league).order_by('-points').all()

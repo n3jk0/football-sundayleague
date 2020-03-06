@@ -13,27 +13,6 @@ TEAM_NAME_SIMILARITY = 0.7
 
 def get_results_text():
     biltens = File.objects.filter(already_read=False, is_fixture=False).all()
-    # biltens_names = [bilten.file_content.name for bilten in biltens]
-    # for _, dirfile, files in walk('../media/'):
-    # for _, dirfile, files in walk('media/'):
-    #     for file in files:
-    #         if file in biltens_names:
-    #             # if file.startswith("bilten"):
-    #             #     file_name = '../media/' + file
-    #             file_name = 'media/' + file
-    #             with open(file_name, 'rb') as f:
-    #                 print("Start reading file", file_name)
-    #                 doc = BytesIO(f.read())
-    #                 text = docx2txt.process(doc)
-    #                 text = re.sub(r'[\n\t]+', '\n', text)
-    #                 text = re.sub(r'Š', 'S', text)
-    #                 text = re.sub(r'Ž', 'Z', text)
-    #                 text = re.sub(r'Č', 'C', text)
-    #                 text = re.sub(r'–', '-', text)
-    #                 f = File.objects.get(file_content=file)
-    #                 f.already_read = True
-    #                 f.save()
-    #                 return text
     for bilten in biltens:
         with bilten.file_content.open(mode='rb') as f:
             print("Start reading file", bilten.file_content.name)
@@ -102,7 +81,7 @@ def save_result_from_text(results_text):
             # find number in first line
             round_num = int(re.findall('[1-9]+', round_block.split("\n")[0])[0])
             r = Round.objects.get(round_number=round_num, league_number=league_num)
-            results_for_round = re.findall("[0-9A-Z -.]+\n:\n[0-9A-Z -.]+\n[0-9]+:[0-9]+", round_block)
+            results_for_round = re.findall("[0-9A-Z -.]+\n:\n[0-9A-Z -.]+\n[0-9]+:[0-9]+[(b.b.)]*", round_block)
             for result_per_round in results_for_round:
                 lines = result_per_round.split("\n")
                 matches_in_round = Match.objects.filter(round=r)
@@ -111,6 +90,9 @@ def save_result_from_text(results_text):
                 match = matches_in_round.get(first_team=first_team, second_team=second_team)
                 result = re.split(':', lines[3])
                 match.first_team_score = result[0]
+                if str(result[1]).endswith('(b.b.)'):
+                    match.is_surrendered = True
+                    result[1] = result[1].split('(b.b.)')[0]
                 match.second_team_score = result[1]
                 saved_results.append(match)
                 print(match, "saved.")
@@ -149,6 +131,7 @@ def fill_table():
             row.goals_against = 0
             row.goals_for = 0
             row.points = 0
+            row.penalty_points = 0
         else:
             row.team = team
             row.league = team.league
@@ -177,6 +160,13 @@ def fill_table():
             else:
                 row.draws += 1
                 row.points += 1
+            # penalty points
+            if match.is_surrendered and res < 0:
+                if row.penalty_points == 0:
+                    row.penalty_points = -1
+                elif row.penalty_points == -1:
+                    row.penalty_points = -3
+        row.points += row.penalty_points
         row.save()
     return response
 
