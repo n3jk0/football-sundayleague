@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 
 
@@ -29,12 +31,14 @@ class Match(models.Model):
     time = models.TimeField()
     first_team_score = models.IntegerField(null=True, blank=True)
     second_team_score = models.IntegerField(null=True, blank=True)
+    is_surrendered = models.BooleanField(default=False)
 
     def __str__(self):
         return "{} ({}-{}) {}".format(self.first_team, self.first_team_score, self.second_team_score,  self.second_team)
 
 
 class File(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     is_fixture = models.BooleanField(default=False)
     already_read = models.BooleanField(default=False)
     file_content = models.FileField(blank=False)
@@ -53,6 +57,7 @@ class TableRow(models.Model):
     goals_for = models.IntegerField(default=0)
     goals_against = models.IntegerField(default=0)
     points = models.IntegerField(default=0)
+    penalty_points = models.IntegerField(default=0)
 
     def __str__(self):
         return "{} (GD:{} PT:{})".format(self.team, (self.goals_for - self.goals_against), self.points)

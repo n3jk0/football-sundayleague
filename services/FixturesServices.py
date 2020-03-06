@@ -14,30 +14,30 @@ MATCH_HOURS = ['8:30', '9:40', '10:50', '12:00', '13:10', '14:20']
 
 
 # todo: more seasons
-# todo: go trough File model instead of media dir
 def get_fixtures_text():
-    for _, dirfile, files in walk('media/'):
-        for file in files:
-            if str(file).startswith('razpored'):
-                file_name = 'media/' + file
-                with open(file_name, 'rb') as f:
-                    print("Start reading file", file_name)
-                    doc = BytesIO(f.read())
-                    text = docx2txt.process(doc)
-                    text = re.sub(r'[\n\t]+', '\n', text)
-                    text = re.sub(r'Š', 'S', text)
-                    text = re.sub(r'Ž', 'Z', text)
-                    text = re.sub(r'Č', 'C', text)
-                    text = re.sub(r'–', '-', text)
-                    return text
+    fixtures = File.objects.filter(is_fixture=True).all()
+    for fixture in fixtures:
+        with fixture.file_content.open(mode='rb') as f:
+            print("Start reading file", fixture.file_content.name)
+            doc = BytesIO(f.read())
+            text = docx2txt.process(doc)
+            text = re.sub(r'[\n\t]+', '\n', text)
+            text = re.sub(r'Š', 'S', text)
+            text = re.sub(r'Ž', 'Z', text)
+            text = re.sub(r'Č', 'C', text)
+            text = re.sub(r'–', '-', text)
+            f = File.objects.get(file_content=fixture.file_content)
+            f.already_read = True
+            f.save()
+            return text
     return ""
 
 
 def save_teams():
     fixtures_text = get_fixtures_text()
     teams = re.findall('[0-9]+[\.][\n][1-9]*[A-Z -]+[0-9]*', fixtures_text)
-    [Team.objects.get_or_create(name=team.split("\n")[1]) for team in teams]
-    return "DONE"
+    saved_teams = [Team.objects.get_or_create(name=team.split("\n")[1]) for team in teams]
+    return saved_teams
 
 
 def find_almost_same_name(all_team_names, team_name):
