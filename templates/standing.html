@@ -38,7 +38,7 @@
             {% for row in table_rows %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ row.team }}</td>
+                    <td><a style="color: black;" href="fixtures/{{ selected_league }}/?round=all&team_id={{ row.team.id }}">{{ row.team }}</a></td>
                     <td>{{ row.match_played }}</td>
                     <td>{{ row.wins }}</td>
                     <td>{{ row.draws }}</td>
