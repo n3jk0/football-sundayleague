@@ -81,12 +81,25 @@ class TableRow(models.Model):
 
 
 class Player(models.Model):
-    team = models.OneToOneField(Team, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
     position = models.CharField(max_length=3, choices=PLAYER_POSITIONS, default='GK')
     first_name = models.CharField(max_length=255)
     family_name = models.CharField(max_length=255)
     goals = models.IntegerField(default=0)
     assists = models.IntegerField(default=0)
 
+    def name(self):
+        return "{} {}".format(self.first_name, self.family_name)
+
     def __str__(self):
         return "{} {} ({})".format(self.first_name, self.family_name, self.team)
+
+
+class MatchGoals(models.Model):
+    match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    scorer = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='scorer')
+    assistant = models.ForeignKey(Player, on_delete=models.CASCADE, default=None, null=True, blank=True, related_name='assistant')
+
+    def __str__(self):
+        return "{} ({})".format(self.scorer.name(), self.match)

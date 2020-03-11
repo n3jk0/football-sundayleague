@@ -50,17 +50,52 @@
                                 {% for match in match_list %}
                                     <tr>
                                         <td style="width: 5%">{{ match.time|date:'H:i' }}</td>
-                                        <td class="text-right" style="width: 30%">{{ match.first_team }}</td>
+                                        <td class="text-right" style="width: 40%">{{ match.first_team }}</td>
                                         {% if match.is_surrendered %}
-                                            <td class="text-center" style="width: 20px">{{ match.first_team_score }}
-                                                - {{ match.second_team_score }} (b.b.)
+                                            {#todo: hover style#}
+                                            <td class="text-center" style="width: 15%"><a
+                                                    onclick="toggleScore('score-details-{{ match.id }}')"
+                                                    style="color: black; cursor: pointer;">{{ match.first_team_score }} - {{ match.second_team_score }} (b.b.)</a>
                                             </td>
                                         {% else %}
-                                            <td class="text-center" style="width: 20px">{{ match.first_team_score }}
-                                                - {{ match.second_team_score }}</td>
+                                            <td class="text-center" style="width: 15%"><a
+                                                    onclick="toggleScore('score-details-{{ match.id }}')"
+                                                    style="color: black; cursor: pointer;">{{ match.first_team_score }} - {{ match.second_team_score }}</a></td>
                                         {% endif %}
-                                        <td style="width: 30%">{{ match.second_team }}</td>
+                                        <td style="width: 40%">{{ match.second_team }}</td>
                                     </tr>
+                                    {% for gm_key, gm_value in goals_by_match.items %}
+                                        {% if gm_key == match.id %}
+                                            {# todo: style="display: none;" and js for toggle#}
+                                            <tr id="score-details-{{ match.id }}" style="display: none;">
+                                                <td></td>
+                                                <td class="text-right">
+                                                    {% for gm_key2, gm_value2 in gm_value.items %}
+                                                        {% if gm_key2 == match.first_team.id %}
+                                                            {% for scorer in gm_value2 %}
+                                                                {{ scorer }} &#9917;
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </td>
+                                                <td></td>
+                                                <td>
+                                                    {% for gm_key2, gm_value2 in gm_value.items %}
+                                                        {% if gm_key2 == match.second_team.id %}
+                                                            {% for scorer in gm_value2 %}
+                                                                <p>&#9917; {{ scorer }}</p>
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if not goals_by_match|get_item:match.id %}
+                                        <tr id="score-details-{{ match.id }}" style="display: none;">
+                                            <td colspan="4"></td>
+                                        </tr>
+                                    {% endif %}
                                 {% endfor %}
                                 </tbody>
                             </table>

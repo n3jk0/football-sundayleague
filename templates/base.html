@@ -28,6 +28,15 @@
         gtag('js', new Date());
 
         gtag('config', 'UA-159841913-1');
+
+        function toggleScore(elementId) {
+            var x = document.getElementById(elementId);
+            if (x.style.display === "none") {
+                x.style.display = "contents";
+            } else {
+                x.style.display = "none";
+            }
+        }
     </script>
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %}</title>

@@ -4,6 +4,7 @@ from sundayleagueApp.models import *
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
+from django.template.defaulttags import register
 
 import services.FixturesServices as FixturesServices
 import services.ResultsService as ResultsService
@@ -42,10 +43,21 @@ def fixtures(request, league):
         [matches_group_by_rounds.setdefault(m.round_id, []).append(m) for m in all_matches]
         table_rows = TableRow.objects.filter(league=league).order_by('-points').all()
         top_scorers = Player.objects.filter(team__league=league, goals__gt=0).order_by('goals')[:5]
+        all_match_goals = MatchGoals.objects.filter(team__league=league).all()
+        # todo: something better
+        goals_by_match = {}
+        [goals_by_match.setdefault(mg.match_id, []).append(mg) for mg in all_match_goals]
+        for key,  val in goals_by_match.items():
+            goals_by_team = {}
+            [goals_by_team.setdefault(mg.team_id, []).append(mg.scorer.name()) for mg in val]
+            goals_by_match[key] = goals_by_team
+        print(goals_by_match)
+
         return render(request, 'fixtures.html',
                       {'matches': matches_group_by_rounds, 'rounds': rounds_group_by_league, 'all_rounds': all_rounds,
                        'table_rows': table_rows, 'fixtures_class': 'btn-light', 'standing_class': 'btn-secondary',
-                       'selected_round': selected_round, 'selected_league': league, 'top_scorers': top_scorers})
+                       'selected_round': selected_round, 'selected_league': league, 'top_scorers': top_scorers,
+                       'goals_by_match': goals_by_match})
     else:
         return HttpResponse("Wrong method!", status=405)
 
@@ -123,3 +135,10 @@ def fill_table(request):
         return HttpResponse("DONE")
     else:
         return HttpResponse("Wrong method!", status=405)
+
+
+@register.filter
+def get_item(dictionary, key):
+    print(dictionary, key)
+    return dictionary.get(key)
+
