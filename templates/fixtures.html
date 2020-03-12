@@ -16,8 +16,11 @@
 
 {% block content %}
     <div>
-        <a href="fixtures/{{ selected_league }}/" role="button" class="btn {{ fixtures_class }} btn-lg">Rezultati</a>
-        <a href="standing/{{ selected_league }}/" role="button" class="btn {{ standing_class }} btn-lg">Lestvica</a>
+        <a href="fixtures/{{ selected_league }}/" role="button" class="btn btn-light btn-lg">Rezultati</a>
+        <a href="standing/{{ selected_league }}/" role="button" class="btn btn-secondary btn-lg">Lestvica</a>
+        <a href="scorers/{{ selected_league }}/" role="button" class="btn btn-secondary btn-lg">Top strelci</a>
+
+        <a class="btn btn-light float-right" href="{{ request.path }}?round={{ request.GET.round|add:1 }}">&raquo;</a>
         <a class="btn btn-secondary dropdown-toggle float-right" href="#" role="button" id="dropdownMenuLink"
            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             {% if selected_round == None %}
@@ -26,6 +29,8 @@
                 Krog {{ selected_round }}
             {% endif %}
         </a>
+        <a class="btn btn-light float-right" href="{{ request.path }}?round={{ request.GET.round|add:-1 }}">&laquo;</a>
+
 
         <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
             <a class="dropdown-item" href="{{ request.path }}?round=all">Vsi krogi</a>
@@ -52,7 +57,6 @@
                                         <td style="width: 5%">{{ match.time|date:'H:i' }}</td>
                                         <td class="text-right" style="width: 40%">{{ match.first_team }}</td>
                                         {% if match.is_surrendered %}
-                                            {#todo: hover style#}
                                             <td class="text-center" style="width: 15%"><a
                                                     onclick="toggleScore('score-details-{{ match.id }}')"
                                                     style="color: black; cursor: pointer;">{{ match.first_team_score }} - {{ match.second_team_score }} (b.b.)</a>
@@ -154,7 +158,7 @@
                 {% for player in top_scorers %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ player.first_name }} {{ player.family_name }}</td>
+                        <td>{{ player.first_name|make_list|first }}. {{ player.family_name }}</td>
                         <td>{{ player.team }}</td>
                         <td>{{ player.goals }}</td>
                     </tr>

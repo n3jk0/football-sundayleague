@@ -13,6 +13,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     url(r'^fixtures/(?P<league>[1-9]+)/$', views.fixtures, name='fixtures'),
     url(r'^standing/(?P<league>[1-9]+)/$', views.standing, name='standing'),
+    url(r'^scorers/(?P<league>[1-9]+)/$', views.scorers, name='scorers'),
     url(r'^uploadfixtures/', views.uploadfixtures, name="upload-fixtures"),
     path('results/', views.results, name="all-results"),
     url(r'^results/(?P<file_id>.+)/$', views.results, name='results-by-id'),
