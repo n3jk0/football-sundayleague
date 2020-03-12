@@ -1,6 +1,23 @@
 import uuid
+from enum import Enum
 
 from django.db import models
+
+
+# todo: can't delete because of migrations
+class PlayerPosition(Enum):
+    goalkeeper = 'GK'
+    defender = 'DEF'
+    midfielder = 'MID'
+    forward = 'FWD'
+
+
+PLAYER_POSITIONS = [
+    ('GK', 'Vratar'),
+    ('DEF', 'Branilec'),
+    ('MID', 'Vezist'),
+    ('FWD', 'Napadalec'),
+]
 
 
 # Create your models here.
@@ -34,7 +51,7 @@ class Match(models.Model):
     is_surrendered = models.BooleanField(default=False)
 
     def __str__(self):
-        return "{} ({}-{}) {}".format(self.first_team, self.first_team_score, self.second_team_score,  self.second_team)
+        return "{} ({}-{}) {}".format(self.first_team, self.first_team_score, self.second_team_score, self.second_team)
 
 
 class File(models.Model):
@@ -61,3 +78,28 @@ class TableRow(models.Model):
 
     def __str__(self):
         return "{} (GD:{} PT:{})".format(self.team, (self.goals_for - self.goals_against), self.points)
+
+
+class Player(models.Model):
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    position = models.CharField(max_length=3, choices=PLAYER_POSITIONS, default='GK')
+    first_name = models.CharField(max_length=255)
+    family_name = models.CharField(max_length=255)
+    goals = models.IntegerField(default=0)
+    assists = models.IntegerField(default=0)
+
+    def name(self):
+        return "{} {}".format(self.first_name, self.family_name)
+
+    def __str__(self):
+        return "{} {} ({})".format(self.first_name, self.family_name, self.team)
+
+
+class MatchGoals(models.Model):
+    match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    scorer = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='scorer')
+    assistant = models.ForeignKey(Player, on_delete=models.CASCADE, default=None, null=True, blank=True, related_name='assistant')
+
+    def __str__(self):
+        return "{} ({})".format(self.scorer.name(), self.match)

@@ -16,11 +16,12 @@
 
 {% block content %}
     <div>
-        <a href="fixtures/{{ selected_league }}/" role="button" class="btn {{ fixtures_class }} btn-lg">Rezultati</a>
-        <a href="standing/{{ selected_league }}/" role="button" class="btn {{ standing_class }} btn-lg">Lestvica</a>
+        <a href="fixtures/{{ selected_league }}/" role="button" class="btn btn-secondary btn-lg">Rezultati</a>
+        <a href="standing/{{ selected_league }}/" role="button" class="btn btn-light btn-lg">Lestvica</a>
+        <a href="scorers/{{ selected_league }}/" role="button" class="btn btn-secondary btn-lg">Top strelci</a>
     </div>
     <div class="shadow p-2 shadow bg-light rounded">
-        <h3>Lestvica:</h3>
+        <h3>Lestvica: Liga {{ selected_league }}</h3>
         <table class="table table-striped">
             <thead>
             <tr>
@@ -38,7 +39,9 @@
             {% for row in table_rows %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td><a style="color: black;" href="fixtures/{{ selected_league }}/?round=all&team_id={{ row.team.id }}">{{ row.team }}</a></td>
+                    <td><a style="color: black;"
+                           href="fixtures/{{ selected_league }}/?round=all&team_id={{ row.team.id }}">{{ row.team }}</a>
+                    </td>
                     <td>{{ row.match_played }}</td>
                     <td>{{ row.wins }}</td>
                     <td>{{ row.draws }}</td>
@@ -54,4 +57,32 @@
             </tbody>
         </table>
     </div>
+{% endblock %}
+
+{% block standing %}
+    {% if top_scorers|length > 0 %}
+        <div class="shadow p-2 shadow bg-light rounded">
+            <h3>Najbolši strelci:</h3>
+            <table class="table table-sm">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Igralec</th>
+                    <th scope="col">Ekipa</th>
+                    <th class="text-center" scope="col">G</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for player in top_scorers %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ player.first_name }} {{ player.family_name }}</td>
+                        <td>{{ player.team }}</td>
+                        <td>{{ player.goals }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
 {% endblock %}

@@ -9,9 +9,14 @@ from django.conf.urls import url
 
 admin.site.register(Round)
 admin.site.register(Team)
-admin.site.register(Match)
 admin.site.register(TableRow)
 
+admin.site.register(Player)
+admin.site.register(MatchGoals)
+
+@admin.register(Match)
+class MatchAdmin(admin.ModelAdmin):
+    list_display = ('id', '__str__')
 
 @admin.register(File)
 class FileAdmin(admin.ModelAdmin):
@@ -46,6 +51,7 @@ class FileAdmin(admin.ModelAdmin):
             if obj.already_read or obj.id is None:
                 # disabled button
                 return format_html("<a class=\"button\" disabled>Uvozi razpored</a>")
-            return format_html("<a class=\"button\" href=\"/uploadfixtures/\" onclick='return confirm(\"Shranjevanje lahko traja nekaj časa. Ste prepričani da želite nadeljevati?\");'>Uvozi razpored</a>",)
+            return format_html(
+                "<a class=\"button\" href=\"/uploadfixtures/\" onclick='return confirm(\"Shranjevanje lahko traja nekaj časa. Ste prepričani da želite nadeljevati?\");'>Uvozi razpored</a>", )
 
     file_actions.short_description = "Uvozi datoteko"

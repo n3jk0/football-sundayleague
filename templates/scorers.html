@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %} Naj strelci {% endblock %}
+
+{% block navigation_buttons %}
+    <div class="list-group">
+        <button type="button" class="btn btn-light btn-lg" disabled>
+            Lige:
+        </button>
+        <a href="scorers/1/" role="button" class="btn btn-secondary btn-lg">Liga 1</a>
+        <a href="scorers/2/" role="button" class="btn btn-secondary btn-lg">Liga 2</a>
+        <a href="scorers/3/" role="button" class="btn btn-secondary btn-lg">Liga 3</a>
+        <a href="scorers/4/" role="button" class="btn btn-secondary btn-lg">Liga 4</a>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <a href="fixtures/{{ selected_league }}/" role="button" class="btn btn-secondary btn-lg">Rezultati</a>
+        <a href="standing/{{ selected_league }}/" role="button" class="btn btn-secondary btn-lg">Lestvica</a>
+        <a href="scorers/{{ selected_league }}/" role="button" class="btn btn-light btn-lg">Top strelci</a>
+    </div>
+
+    <div class="shadow p-2 shadow bg-light rounded">
+        <h3>Najbolši strelci: Liga {{ selected_league }}</h3>
+        <table class="table table-sm">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Igralec</th>
+                <th scope="col">Ekipa</th>
+                <th class="text-center" scope="col">Goli</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for player in page_scorers %}
+                <tr>
+                    <td>{{ forloop.counter0|add:page_scorers.start_index }}</td>
+                    <td>{{ player.first_name }} {{ player.family_name }}</td>
+                    <td>{{ player.team }}</td>
+                    <td>{{ player.goals }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+    <span class="step-links">
+        {% if page_scorers.has_previous %}
+            <a class="btn btn-secondary" href="scorers/{{ selected_league }}/?page=1">&laquo; prva</a>
+            <a class="btn btn-secondary" href="scorers/{{ selected_league }}/?page={{ page_scorers.previous_page_number }}">nazaj</a>
+        {% endif %}
+
+        <span class="current" style="color: white;">
+            Stran {{ page_scorers.number }} od {{ page_scorers.paginator.num_pages }}.
+        </span>
+
+        {% if page_scorers.has_next %}
+            <a class="btn btn-secondary" href="scorers/{{ selected_league }}/?page={{ page_scorers.next_page_number }}">naprej</a>
+            <a class="btn btn-secondary" href="scorers/{{ selected_league }}/?page={{ page_scorers.paginator.num_pages }}">zadnja &raquo;</a>
+        {% endif %}
+    </span>
+    </div>
+{% endblock %}
