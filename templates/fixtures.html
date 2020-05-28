@@ -59,12 +59,12 @@
                                         {% if match.is_surrendered %}
                                             <td class="text-center" style="width: 15%"><a
                                                     onclick="toggleScore('score-details-{{ match.id }}')"
-                                                    style="color: black; cursor: pointer;">{{ match.first_team_score }} - {{ match.second_team_score }} (b.b.)</a>
+                                                    style="color: black; cursor: pointer;">{{ match.first_team_score|default_if_none:"" }} - {{ match.second_team_score|default_if_none:"" }} (b.b.)</a>
                                             </td>
                                         {% else %}
                                             <td class="text-center" style="width: 15%"><a
                                                     onclick="toggleScore('score-details-{{ match.id }}')"
-                                                    style="color: black; cursor: pointer;">{{ match.first_team_score }} - {{ match.second_team_score }}</a></td>
+                                                    style="color: black; cursor: pointer;">{{ match.first_team_score|default_if_none:"" }} - {{ match.second_team_score|default_if_none:"" }}</a></td>
                                         {% endif %}
                                         <td style="width: 40%">{{ match.second_team }}</td>
                                     </tr>
@@ -77,7 +77,7 @@
                                                     {% for gm_key2, gm_value2 in gm_value.items %}
                                                         {% if gm_key2 == match.first_team.id %}
                                                             {% for scorer in gm_value2 %}
-                                                                {{ scorer }} &#9917;
+                                                    <p class="mb-1">{{ scorer }} &#9917;</p>
                                                             {% endfor %}
                                                         {% endif %}
                                                     {% endfor %}
@@ -87,7 +87,7 @@
                                                     {% for gm_key2, gm_value2 in gm_value.items %}
                                                         {% if gm_key2 == match.second_team.id %}
                                                             {% for scorer in gm_value2 %}
-                                                                <p>&#9917; {{ scorer }}</p>
+                                                                <p class="mb-1">&#9917; {{ scorer }}</p>
                                                             {% endfor %}
                                                         {% endif %}
                                                     {% endfor %}
