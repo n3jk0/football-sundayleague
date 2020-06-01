@@ -35,7 +35,7 @@ def get_fixtures_text():
 
 def save_teams():
     fixtures_text = get_fixtures_text()
-    teams = re.findall('[0-9]+[\.][\n][1-9]*[A-Z -]+[0-9]*', fixtures_text)
+    teams = re.findall('[0-9]+[\.][\n][0-9]*[A-Z -]+[0-9]*', fixtures_text)
     saved_teams = [Team.objects.get_or_create(name=team.split("\n")[1]) for team in teams]
     return saved_teams
 

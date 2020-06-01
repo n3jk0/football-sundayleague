@@ -72,14 +72,14 @@ def save_result_from_text(results_text):
         else:
             league_block = results_text[league_indexes[i]:league_indexes[i + 1]]
 
-        rounds_indexes = [m.start() for m in re.finditer('[1-9. ]+KROG', league_block)]
+        rounds_indexes = [m.start() for m in re.finditer('[0-9. ]+KROG', league_block)]
         for j in range(len(rounds_indexes)):
             if j + 1 >= len(rounds_indexes):
                 round_block = league_block[rounds_indexes[j]:]
             else:
                 round_block = league_block[rounds_indexes[j]:rounds_indexes[j + 1]]
             # find number in first line
-            round_num = int(re.findall('[1-9]+', round_block.split("\n")[0])[0])
+            round_num = int(re.findall('[0-9]+', round_block.split("\n")[0])[0])
             r = Round.objects.get(round_number=round_num, league_number=league_num)
             results_for_round = re.findall("[0-9A-Z -.]+\n:\n[0-9A-Z -.]+\n[0-9]+:[0-9]+[(b.b.)]*", round_block)
             for result_per_round in results_for_round:
