@@ -157,10 +157,10 @@
                 <tbody>
                 {% for player in top_scorers %}
                     <tr>
-                        <td><small>{{ forloop.counter }}</small></td>
-                        <td><small>{{ player.first_name|make_list|first }}. {{ player.family_name }}</small></td>
-                        <td><small>{{ player.team }}</small></td>
-                        <td><small>{{ player.goals }}</small></td>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ player.first_name|make_list|first }}. {{ player.family_name }}</td>
+                        <td>{{ player.team }}</td>
+                        <td>{{ player.goals }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
