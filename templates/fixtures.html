@@ -57,12 +57,12 @@
                                         <td style="width: 5%">{{ match.time|date:'H:i' }}</td>
                                         <td class="text-right" style="width: 40%">{{ match.first_team }}</td>
                                         {% if match.is_surrendered %}
-                                            <td class="text-center" style="width: 15%"><a
+                                            <td class="text-center" style="width: 17%"><a
                                                     onclick="toggleScore('score-details-{{ match.id }}')"
                                                     style="color: black; cursor: pointer;">{{ match.first_team_score|default_if_none:"" }} - {{ match.second_team_score|default_if_none:"" }} (b.b.)</a>
                                             </td>
                                         {% else %}
-                                            <td class="text-center" style="width: 15%"><a
+                                            <td class="text-center" style="width: 17%"><a
                                                     onclick="toggleScore('score-details-{{ match.id }}')"
                                                     style="color: black; cursor: pointer;">{{ match.first_team_score|default_if_none:"" }} - {{ match.second_team_score|default_if_none:"" }}</a></td>
                                         {% endif %}
