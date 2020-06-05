@@ -15,7 +15,7 @@ MATCH_HOURS = ['8:30', '9:40', '10:50', '12:00', '13:10', '14:20']
 
 # todo: more seasons
 def get_fixtures_text():
-    fixtures = File.objects.filter(is_fixture=True).all()
+    fixtures = File.objects.filter(is_fixture=True, already_read=False).all()
     for fixture in fixtures:
         with fixture.file_content.open(mode='rb') as f:
             print("Start reading file", fixture.file_content.name)
