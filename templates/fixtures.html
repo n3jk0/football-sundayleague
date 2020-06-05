@@ -130,11 +130,11 @@
                     <td><a style="color: black;"
                            href="fixtures/{{ selected_league }}/?round=all&team_id={{ row.team.id }}">{{ row.team }}</a>
                     </td>
-                    <td>{{ row.match_played }}</td>
+                    <td class="text-center">{{ row.match_played }}</td>
                     {% if row.penalty_points < 0 %}
-                        <td>{{ row.points }}({{ row.penalty_points }})</td>
+                        <td class="text-center">{{ row.points }}({{ row.penalty_points }})</td>
                     {% else %}
-                        <td>{{ row.points }}</td>
+                        <td class="text-center">{{ row.points }}</td>
                     {% endif %}
                 </tr>
             {% endfor %}
@@ -160,7 +160,7 @@
                         <td>{{ forloop.counter }}</td>
                         <td>{{ player.first_name|make_list|first }}. {{ player.family_name }}</td>
                         <td>{{ player.team }}</td>
-                        <td>{{ player.goals }}</td>
+                        <td class="text-center">{{ player.goals }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
