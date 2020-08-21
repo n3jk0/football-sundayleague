@@ -19,6 +19,8 @@ urlpatterns = [
     url(r'^results/(?P<file_id>.+)/$', views.results, name='results-by-id'),
     path('resultstext/', views.results_text, name="resultstext"),
     url(r'^resultstext/(?P<file_id>.+)/$', views.results_text, name='resultstext'),
+    path('fixturestext/', views.fixtures_text, name="fixturestext"),
+    url(r'^fixturestext/(?P<file_id>.+)/$', views.fixtures_text, name='fixturestext'),
     path('table/', views.fill_table, name="fill-table")
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

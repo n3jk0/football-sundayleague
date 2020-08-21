@@ -148,6 +148,15 @@ def results_text(request, file_id=-1):
 
 
 @csrf_exempt
+def fixtures_text(request, file_id=-1):
+    if request.method == 'GET':
+        text = FixturesServices.get_fixtures_text()
+        return HttpResponse(text)
+    else:
+        return HttpResponse("Wrong method!", status=405)
+
+
+@csrf_exempt
 def fill_table(request):
     if request.method == 'POST':
         ResultsService.fill_table()
