@@ -33,8 +33,31 @@ def get_fixtures_text():
     return ""
 
 
-def save_teams():
-    fixtures_text = get_fixtures_text()
+def get_fixtures_text_by_id(file_id):
+    bilten = File.objects.filter(is_fixture=True, id=file_id)
+    if bilten.exists():
+        bilten = bilten.first()
+    else:
+        print("File " + file_id + " doesn't exists.")
+        return None
+    with bilten.file_content.open(mode='rb') as f:
+        print("Start reading file", bilten.file_content.name)
+        doc = BytesIO(f.read())
+        text = docx2txt.process(doc)
+        text = re.sub(r'[\n\t]+', '\n', text)
+        text = re.sub(r'Š', 'S', text)
+        text = re.sub(r'Ž', 'Z', text)
+        text = re.sub(r'Č', 'C', text)
+        text = re.sub(r'–', '-', text)
+        f = File.objects.get(file_content=bilten.file_content)
+        f.already_read = True
+        f.save()
+        return text
+
+
+def save_teams(fixtures_text=""):
+    if not fixtures_text:
+        fixtures_text = get_fixtures_text()
     teams = re.findall('[0-9]+[\.][\n][0-9]*[A-Z -]+[0-9]*', fixtures_text)
     saved_teams = [Team.objects.get_or_create(name=team.split("\n")[1]) for team in teams]
     return saved_teams
@@ -48,13 +71,16 @@ def find_almost_same_name(all_team_names, team_name):
     return ""
 
 
-def save_rounds():
-    fixtures_text = get_fixtures_text()
+def save_rounds(fixtures_text=""):
+    if not fixtures_text:
+        fixtures_text = get_fixtures_text()
     rounds_blocks = re.findall("[0-9]+\.[ ]*KROG[\n].*[\n].*[\n].*[\n].*[\n].*", fixtures_text)
     prev_round = -1
     current_league = 1
     team_names = [team.name for team in Team.objects.all()]
+    print(len(rounds_blocks))
     for i, block in enumerate(rounds_blocks):
+        print(block)
         lines = block.split("\n")
         round_number = int(re.findall("[0-9]+", lines[0])[0])
         if round_number < prev_round:
@@ -69,8 +95,9 @@ def save_rounds():
     return "DONE"
 
 
-def save_matches():
-    fixtures_text = get_fixtures_text()
+def save_matches(fixtures_text=""):
+    if not fixtures_text:
+        fixtures_text = get_fixtures_text()
     matches_blocks = re.findall("[0-9A-Z -.]*[\n]:[\n][0-9A-Z -.]*[\n]:", fixtures_text)
     prev_index = fixtures_text.index(matches_blocks[0])
     round_num = 1
@@ -111,3 +138,11 @@ def save_matches():
         time_id += 1
 
     return "DONE"
+
+
+def save_fixtures():
+    fixtures_text = get_fixtures_text()
+    saved_teams = save_teams(fixtures_text)
+    print("{} ekip je bilo shranjenih.".format(len(saved_teams)))
+    save_rounds(fixtures_text)
+    save_matches(fixtures_text)

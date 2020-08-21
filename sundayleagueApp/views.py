@@ -30,7 +30,8 @@ def fixtures(request, league):
             today = datetime.date.today()
             today_plus_4 = today + datetime.timedelta(days=4)
             last_round = all_rounds.order_by('date').filter(date__lte=today_plus_4).last()
-            return redirect(request.path + "?round=" + str(last_round.round_number))
+            last_round_number = last_round.round_number if last_round else 1
+            return redirect(request.path + "?round=" + str(last_round_number))
         filter_rounds = all_rounds
         if selected_round != 'all':
             if not selected_round:
@@ -97,10 +98,8 @@ def uploadfixtures(request):
     # maybe not the best solution to allow GET method here
     if request.method == 'GET' or request.method == 'POST':
         if request.user.is_authenticated:
-            saved_teams = FixturesServices.save_teams()
-            messages.success(request, "{} ekip je bilo shranjenih.".format(len(saved_teams)))
-            FixturesServices.save_rounds()
-            FixturesServices.save_matches()
+            FixturesServices.save_fixtures()
+            ResultsService.fill_table()
             messages.success(request, "Razpored je bil dodan.")
             response = redirect("/admin/sundayleagueApp/file/")
             response.status_code = 303

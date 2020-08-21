@@ -109,6 +109,7 @@ def save_results_for_file(file_id):
 def fill_table():
     matches = Match.objects.exclude(first_team_score__isnull=True).exclude(second_team_score__isnull=True).all()
     if len(matches) < 1:
+        empty_table()
         return {}
 
     matches_grouped_by_team = {}
@@ -169,4 +170,27 @@ def fill_table():
         row.points += row.penalty_points
         row.save()
     return response
+
+
+def empty_table():
+    teams = Team.objects.all()
+    for team in teams:
+        row, created = TableRow.objects.get_or_create(team=team, league=team.league)
+        print(row, created)
+        # clean
+        if not created:
+            row.match_played = 0
+            row.wins = 0
+            row.losses = 0
+            row.draws = 0
+            row.goals_against = 0
+            row.goals_for = 0
+            row.points = 0
+            row.penalty_points = 0
+        else:
+            row.team = team
+            row.league = team.league
+
+        row.points += row.penalty_points
+        row.save()
 
