@@ -1,4 +1,3 @@
-from os import walk
 import docx2txt
 from io import BytesIO
 import re
@@ -57,6 +56,7 @@ def save_results():
     saved_results = []
     while results_text:
         saved_results.append(save_result_from_text(results_text))
+        save_information(results_text)
         results_text = get_results_text()
     return saved_results
 
@@ -103,6 +103,7 @@ def save_result_from_text(results_text):
 
 def save_results_for_file(file_id):
     results_text = get_results_text_by_id(file_id)
+    save_information(results_text)
     return save_result_from_text(results_text)
 
 
@@ -193,4 +194,21 @@ def empty_table():
 
         row.points += row.penalty_points
         row.save()
+
+
+def save_information(results_text):
+    information_index = [m.start() for m in re.finditer('Obvestila', results_text)]
+    for i in information_index:
+        info_text = results_text[i:]
+
+        # todo: temp solution
+        end_index = info_text.index("Rekreacijska liga v nogometu")
+        info_text = info_text[:end_index]
+
+        info_text = info_text.replace("Obvestila:", "")
+        info_text = info_text.replace("\n", "\n\n")
+        info_text = info_text.strip()
+        information = Information(info=info_text)
+        information.save()
+    pass
 
