@@ -7,10 +7,10 @@
         <button type="button" class="btn btn-light" disabled>
             Lige:
         </button>
-        <a href="scorers/1/" role="button" class="btn btn-secondary">Liga 1</a>
-        <a href="scorers/2/" role="button" class="btn btn-secondary">Liga 2</a>
-        <a href="scorers/3/" role="button" class="btn btn-secondary">Liga 3</a>
-        <a href="scorers/4/" role="button" class="btn btn-secondary">Liga 4</a>
+        <a href="scorers/1/" role="button" class="btn {% if "1" == selected_league %}btn-light{% else %}btn-secondary{% endif %}">Liga 1</a>
+        <a href="scorers/2/" role="button" class="btn {% if "2" == selected_league %}btn-light{% else %}btn-secondary{% endif %}">Liga 2</a>
+        <a href="scorers/3/" role="button" class="btn {% if "3" == selected_league %}btn-light{% else %}btn-secondary{% endif %}">Liga 3</a>
+        <a href="scorers/4/" role="button" class="btn {% if "4" == selected_league %}btn-light{% else %}btn-secondary{% endif %}">Liga 4</a>
     </div>
 {% endblock %}
 
@@ -19,6 +19,7 @@
         <a href="fixtures/{{ selected_league }}/" role="button" class="btn btn-secondary btn-lg">Rezultati</a>
         <a href="standing/{{ selected_league }}/" role="button" class="btn btn-secondary btn-lg">Lestvica</a>
         <a href="scorers/{{ selected_league }}/" role="button" class="btn btn-light btn-lg">Top strelci</a>
+        <a href="information/{{ selected_league }}/" role="button" class="btn btn-secondary btn-lg">Obvestila</a>
     </div>
 
     <div class="shadow p-2 shadow bg-light min-vw-75 rounded">

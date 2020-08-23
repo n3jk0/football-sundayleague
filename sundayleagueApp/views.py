@@ -93,6 +93,15 @@ def scorers(request, league):
         return HttpResponse("Wrong method!", status=405)
 
 
+def information(request, league=1):
+    if request.method == 'GET':
+        last_information = Information.objects.order_by("-pk")
+        last_information_text = last_information[0].info if last_information.exists() else ""
+        return render(request, 'information.html', {'last_information': last_information_text, 'selected_league': league})
+    else:
+        return HttpResponse("Wrong method!", status=405)
+
+
 @csrf_exempt
 def uploadfixtures(request):
     # maybe not the best solution to allow GET method here

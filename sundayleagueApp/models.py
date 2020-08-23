@@ -103,3 +103,11 @@ class MatchGoals(models.Model):
 
     def __str__(self):
         return "{} ({})".format(self.scorer.name(), self.match)
+
+
+class Information(models.Model):
+    info = models.TextField(max_length=2055)
+
+    def __str__(self):
+        sub = self.info[:50]
+        return sub if len(sub) == len(self.info) else "{}...".format(sub)

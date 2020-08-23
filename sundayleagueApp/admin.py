@@ -14,9 +14,16 @@ admin.site.register(TableRow)
 admin.site.register(Player)
 admin.site.register(MatchGoals)
 
+
+@admin.register(Information)
+class InformationAdmin(admin.ModelAdmin):
+    list_display = ('id', '__str__')
+
+
 @admin.register(Match)
 class MatchAdmin(admin.ModelAdmin):
     list_display = ('id', '__str__')
+
 
 @admin.register(File)
 class FileAdmin(admin.ModelAdmin):
