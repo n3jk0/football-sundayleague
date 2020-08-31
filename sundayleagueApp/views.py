@@ -51,7 +51,7 @@ def fixtures(request, league):
         all_matches = all_matches.all()
         matches_group_by_rounds = {}
         [matches_group_by_rounds.setdefault(m.round_id, []).append(m) for m in all_matches]
-        table_rows = TableRow.objects.filter(league=league).order_by('-points').all()
+        table_rows = TableRow.objects.filter(league=league).order_by('-points', 'match_played').all()
         top_scorers = Player.objects.filter(team__league=league, goals__gt=0).order_by('-goals')[:5]
         all_match_goals = MatchGoals.objects.filter(team__league=league).all()
         # todo: something better
@@ -74,7 +74,7 @@ def fixtures(request, league):
 
 def standing(request, league):
     if request.method == 'GET':
-        table_rows = TableRow.objects.filter(league=league).order_by('-points').all()
+        table_rows = TableRow.objects.filter(league=league).order_by('-points', 'match_played').all()
         top_scorers = Player.objects.filter(team__league=league, goals__gt=0).order_by('-goals')[:5]
         return render(request, 'standing.html',
                       {'table_rows': table_rows, 'selected_league': league, 'top_scorers': top_scorers})
