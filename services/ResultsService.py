@@ -87,6 +87,7 @@ def save_result_from_text(results_text):
                 matches_in_round = Match.objects.filter(round=r)
                 first_team = Team.objects.get(name=find_almost_same_name(team_names, lines[0]))
                 second_team = Team.objects.get(name=find_almost_same_name(team_names, lines[2]))
+                print("Searching for match:", first_team, second_team)
                 match = matches_in_round.get(first_team=first_team, second_team=second_team)
                 result = re.split(':', lines[3])
                 match.first_team_score = result[0]
