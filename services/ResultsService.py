@@ -138,7 +138,10 @@ def fill_table():
             row.team = team
             row.league = team.league
 
-        matches_for_team = matches_grouped_by_team[team.id]
+        matches_for_team = matches_grouped_by_team.get(team.id)
+        if matches_for_team is None:
+            row.save()
+            continue
         for match in matches_for_team:
             if match.first_team_id == team.id:
                 res = match.first_team_score - match.second_team_score
