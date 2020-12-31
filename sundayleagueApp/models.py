@@ -59,6 +59,7 @@ class File(models.Model):
     is_fixture = models.BooleanField(default=False)
     already_read = models.BooleanField(default=False)
     file_content = models.FileField(blank=False)
+    text_content = models.CharField(max_length=10_000, null=True)
 
     def __str__(self):
         return "{} (prebrano: {})".format(self.file_content.name, self.already_read)

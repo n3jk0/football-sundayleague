@@ -17,19 +17,7 @@ MATCH_HOURS = ['8:30', '9:40', '10:50', '12:00', '13:10', '14:20']
 def get_fixtures_text():
     fixtures = File.objects.filter(is_fixture=True, already_read=False).all()
     for fixture in fixtures:
-        with fixture.file_content.open(mode='rb') as f:
-            print("Start reading file", fixture.file_content.name)
-            doc = BytesIO(f.read())
-            text = docx2txt.process(doc)
-            text = re.sub(r'[\n\t]+', '\n', text)
-            text = re.sub(r'Š', 'S', text)
-            text = re.sub(r'Ž', 'Z', text)
-            text = re.sub(r'Č', 'C', text)
-            text = re.sub(r'–', '-', text)
-            f = File.objects.get(file_content=fixture.file_content)
-            f.already_read = True
-            f.save()
-            return text
+        return file.text_content if bool(file.text_content) else read_file(file)
     return ""
 
 
@@ -40,8 +28,13 @@ def get_fixtures_text_by_id(file_id):
     else:
         print("File " + file_id + " doesn't exists.")
         return None
-    with bilten.file_content.open(mode='rb') as f:
-        print("Start reading file", bilten.file_content.name)
+    return file.text_content if bool(file.text_content) else read_file(file)
+
+
+#todo: duplicate from ResultsSevice; Move to other class
+def read_file(file):
+    with file.file_content.open(mode='rb') as f:
+        print("Start reading file", file.file_content.name)
         doc = BytesIO(f.read())
         text = docx2txt.process(doc)
         text = re.sub(r'[\n\t]+', '\n', text)
@@ -49,11 +42,11 @@ def get_fixtures_text_by_id(file_id):
         text = re.sub(r'Ž', 'Z', text)
         text = re.sub(r'Č', 'C', text)
         text = re.sub(r'–', '-', text)
-        f = File.objects.get(file_content=bilten.file_content)
-        f.already_read = True
-        f.save()
-        return text
 
+        file.already_read = True
+        file.text_content = text
+        file.save()
+        return text
 
 def save_teams(fixtures_text=""):
     if not fixtures_text:
