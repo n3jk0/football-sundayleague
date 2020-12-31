@@ -4,3 +4,4 @@ flask
 dj_database_url
 gunicorn
 docx2txt==0.8
+docx
