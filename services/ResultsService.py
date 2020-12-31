@@ -1,3 +1,4 @@
+import docx
 import docx2txt
 from io import BytesIO
 import re
@@ -11,33 +12,26 @@ TEAM_NAME_SIMILARITY = 0.7
 
 
 def get_results_text():
-    biltens = File.objects.filter(already_read=False, is_fixture=False).all()
-    for bilten in biltens:
-        with bilten.file_content.open(mode='rb') as f:
-            print("Start reading file", bilten.file_content.name)
-            doc = BytesIO(f.read())
-            text = docx2txt.process(doc)
-            text = re.sub(r'[\n\t]+', '\n', text)
-            text = re.sub(r'Š', 'S', text)
-            text = re.sub(r'Ž', 'Z', text)
-            text = re.sub(r'Č', 'C', text)
-            text = re.sub(r'–', '-', text)
-            f = File.objects.get(file_content=bilten.file_content)
-            f.already_read = True
-            f.save()
-            return text
+    files = File.objects.filter(already_read=False, is_fixture=False).all()
+    for file in files:
+        return file.text_content if bool(file.text_content) else read_file(file)
     return ""
 
 
 def get_results_text_by_id(file_id):
-    bilten = File.objects.filter(is_fixture=False, id=file_id)
-    if bilten.exists():
-        bilten = bilten.first()
+    file = File.objects.filter(is_fixture=False, id=file_id)
+    if file.exists():
+        file = file.first()
     else:
-        print("File " + file_id + " doesn't exists.")
+        print("File", file_id, "doesn't exists.")
         return None
-    with bilten.file_content.open(mode='rb') as f:
-        print("Start reading file", bilten.file_content.name)
+
+    return file.text_content if bool(file.text_content) else read_file(file)
+
+
+def read_file(file):
+    with file.file_content.open(mode='rb') as f:
+        print("Start reading file", file.file_content.name)
         doc = BytesIO(f.read())
         text = docx2txt.process(doc)
         text = re.sub(r'[\n\t]+', '\n', text)
@@ -45,10 +39,28 @@ def get_results_text_by_id(file_id):
         text = re.sub(r'Ž', 'Z', text)
         text = re.sub(r'Č', 'C', text)
         text = re.sub(r'–', '-', text)
-        f = File.objects.get(file_content=bilten.file_content)
-        f.already_read = True
-        f.save()
+
+        file.already_read = True
+        file.text_content = text
+        file.save()
         return text
+
+
+# todo: (wip) get pictures from word doc
+def get_docx(file_id):
+    bilten = File.objects.filter(id=file_id)
+    if not bilten.exists():
+        print("Results file (id=", file_id, ") doesn't exist")
+        return
+
+    bilten = bilten.first()
+    doc = docx.Document(bilten.file_content)
+    for tab in doc.tables:
+        first_cell_text = tab.cell(0, 0).text
+        if 'KROG' in first_cell_text:
+            print(first_cell_text)
+
+    print(doc)
 
 
 def save_results():
@@ -214,5 +226,4 @@ def save_information(results_text):
         info_text = info_text.strip()
         information = Information(info=info_text)
         information.save()
-    pass
 
