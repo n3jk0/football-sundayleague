@@ -1,4 +1,3 @@
-import docx
 import docx2txt
 from io import BytesIO
 import re
@@ -44,23 +43,6 @@ def read_file(file):
         file.text_content = text
         file.save()
         return text
-
-
-# todo: (wip) get pictures from word doc
-def get_docx(file_id):
-    bilten = File.objects.filter(id=file_id)
-    if not bilten.exists():
-        print("Results file (id=", file_id, ") doesn't exist")
-        return
-
-    bilten = bilten.first()
-    doc = docx.Document(bilten.file_content)
-    for tab in doc.tables:
-        first_cell_text = tab.cell(0, 0).text
-        if 'KROG' in first_cell_text:
-            print(first_cell_text)
-
-    print(doc)
 
 
 def save_results():
