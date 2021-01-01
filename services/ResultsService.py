@@ -2,7 +2,8 @@ import docx2txt
 from io import BytesIO
 import re
 
-from services.FixturesServices import find_almost_same_name
+from services.CommonService import *
+from services.FixturesService import find_almost_same_name
 from sundayleagueApp.models import *
 
 ROUND_THRESHOLD = 65
@@ -26,23 +27,6 @@ def get_results_text_by_id(file_id):
         return None
 
     return file.text_content if bool(file.text_content) else read_file(file)
-
-
-def read_file(file):
-    with file.file_content.open(mode='rb') as f:
-        print("Start reading file", file.file_content.name)
-        doc = BytesIO(f.read())
-        text = docx2txt.process(doc)
-        text = re.sub(r'[\n\t]+', '\n', text)
-        text = re.sub(r'Š', 'S', text)
-        text = re.sub(r'Ž', 'Z', text)
-        text = re.sub(r'Č', 'C', text)
-        text = re.sub(r'–', '-', text)
-
-        file.already_read = True
-        file.text_content = text
-        file.save()
-        return text
 
 
 def save_results():

@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.template.defaulttags import register
 from django.core.paginator import Paginator
 
-import services.FixturesServices as FixturesServices
+import services.FixturesService as FixturesServices
 import services.ResultsService as ResultsService
 from django.shortcuts import redirect
 
