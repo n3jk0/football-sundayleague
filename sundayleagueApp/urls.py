@@ -3,14 +3,17 @@ from django.contrib import admin
 from django.conf.urls import url
 from django.conf.urls.static import static
 from django.conf import settings
+from sundayleagueApp.admin import site
 
 from . import views
 
+admin.site = site
 admin.autodiscover()
 
 # todo: only one url for results and resultstext
 urlpatterns = [
     path('', views.index, name='index'),
+    url(r'^admin/', admin.site.urls),
     url(r'^fixtures/(?P<league>[1-9]+)/$', views.fixtures, name='fixtures'),
     url(r'^standing/(?P<league>[1-9]+)/$', views.standing, name='standing'),
     url(r'^scorers/(?P<league>[1-9]+)/$', views.scorers, name='scorers'),
