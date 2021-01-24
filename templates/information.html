@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'core.html' %}
 
 {% block title %} Obvestila {% endblock %}
 
@@ -12,7 +12,7 @@
         <a href="scorers/{{ selected_league }}/" role="button" class="btn btn-secondary btn-lg">Strelci</a>
         <a href="information/{{ selected_league }}/" role="button" class="btn btn-light btn-lg">Obvestila</a>
     </div>
-    <div class="shadow p-2 shadow bg-light rounded">
+    <div class="shadow p-2 bg-light rounded">
         <h3>Obvestila:</h3>
         <p class="p-3" style="white-space: pre-line;">{{ last_information }}</p>
     </div>

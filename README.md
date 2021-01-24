@@ -1,4 +1,4 @@
-##Django commands:
+## Django commands:
 
 - create migrations: `python3 manage.py makemigrations`
 - run migrations: `python3 manage.py migrate`

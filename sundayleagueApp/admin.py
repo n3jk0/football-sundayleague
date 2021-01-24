@@ -1,31 +1,29 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from django.contrib.auth.models import User, Group
 
 from .models import *
 from .views import results
+import services.ResultsService as ResultsService
 from django.conf.urls import url
 
-# Register your models here.
 
-admin.site.register(Round)
-admin.site.register(Team)
-admin.site.register(TableRow)
-
-admin.site.register(Player)
-admin.site.register(MatchGoals)
+class MyAdminSite(admin.AdminSite):
+    login_template = 'admin/login.html'
 
 
-@admin.register(Information)
 class InformationAdmin(admin.ModelAdmin):
     list_display = ('id', '__str__')
 
 
-@admin.register(Match)
 class MatchAdmin(admin.ModelAdmin):
     list_display = ('id', '__str__')
 
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        ResultsService.update_table()
 
-@admin.register(File)
+
 class FileAdmin(admin.ModelAdmin):
     list_display = (
         'id',
@@ -62,3 +60,21 @@ class FileAdmin(admin.ModelAdmin):
                 "<a class=\"button\" href=\"/uploadfixtures/\" onclick='return confirm(\"Shranjevanje lahko traja nekaj časa. Ste prepričani da želite nadeljevati?\");'>Uvozi razpored</a>", )
 
     file_actions.short_description = "Uvozi datoteko"
+
+
+# Register your models here.
+site = MyAdminSite(name='admin')
+
+site.register(User)
+site.register(Group)
+
+site.register(Round)
+site.register(Team)
+site.register(TableRow)
+
+site.register(Player)
+site.register(MatchGoals)
+
+site.register(Information, InformationAdmin)
+site.register(Match, MatchAdmin)
+site.register(File, FileAdmin)

@@ -31,7 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'sundayleagueApp.apps.SundayleagueappConfig',
+    'sundayleagueApp',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,7 +55,7 @@ ROOT_URLCONF = 'sundayleague.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ["templates"],
+        'DIRS': [os.path.join(os.path.dirname(__file__) , '../templates').replace('\\','/')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

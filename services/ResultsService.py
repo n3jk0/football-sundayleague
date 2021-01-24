@@ -82,11 +82,13 @@ def save_result_from_text(results_text):
 
 def save_results_for_file(file_id):
     results_text = get_results_text_by_id(file_id)
+    if not results_text:
+        return []
     save_information(results_text)
     return save_result_from_text(results_text)
 
 
-def fill_table():
+def update_table():
     matches = Match.objects.exclude(first_team_score__isnull=True).exclude(second_team_score__isnull=True).all()
     if len(matches) < 1:
         empty_table()
