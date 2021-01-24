@@ -15,7 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.conf.urls import url
+from sundayleagueApp.admin import site
+
+admin.site = site
+admin.autodiscover()
 
 urlpatterns = [
     path('', include('sundayleagueApp.urls')),
+    url(r'^admin/', admin.site.urls),
 ]

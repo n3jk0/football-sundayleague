@@ -3,30 +3,26 @@ from django.contrib import admin
 from django.conf.urls import url
 from django.conf.urls.static import static
 from django.conf import settings
-from sundayleagueApp.admin import site
+from django.contrib.auth import views as auth_views
 
 from . import views
 
-admin.site = site
-admin.autodiscover()
+app_name = 'sunday_league'
 
 # todo: only one url for results and resultstext
 urlpatterns = [
-    path('', views.index, name='index'),
-    url(r'^admin/', admin.site.urls),
-    url(r'^fixtures/(?P<league>[1-9]+)/$', views.fixtures, name='fixtures'),
-    url(r'^standing/(?P<league>[1-9]+)/$', views.standing, name='standing'),
-    url(r'^scorers/(?P<league>[1-9]+)/$', views.scorers, name='scorers'),
-    url(r'^information/(?P<league>[1-9]+)/$', views.information, name='information'),
-    url(r'^information/$', views.information, name='information'),
-    url(r'^uploadfixtures/', views.uploadfixtures, name="upload-fixtures"),
-    path('results/', views.results, name="all-results"),
-    url(r'^results/(?P<file_id>.+)/$', views.results, name='results-by-id'),
-    path('resultstext/', views.results_text, name="resultstext"),
-    url(r'^resultstext/(?P<file_id>.+)/$', views.results_text, name='resultstext'),
-    path('fixturestext/', views.fixtures_text, name="fixturestext"),
-    url(r'^fixturestext/(?P<file_id>.+)/$', views.fixtures_text, name='fixturestext'),
-    path('table/', views.fill_table, name="fill-table")
+  path('', views.index, name='home'),
+  url(r'^fixtures/(?P<league>[1-9]+)/$', views.fixtures, name='fixtures'),
+  url(r'^standing/(?P<league>[1-9]+)/$', views.standing, name='standing'),
+  url(r'^scorers/(?P<league>[1-9]+)/$', views.scorers, name='scorers'),
+  url(r'^information/(?P<league>[1-9]+)/$', views.information, name='information'),
+  url(r'^information/$', views.information, name='information'),
+  url(r'^uploadfixtures/', views.uploadfixtures, name="upload-fixtures"),
+  url(r'^results/(?P<file_id>.+)/$', views.results, name='results-by-id'),
+  url(r'^resultstext/(?P<file_id>.+)/$', views.results_text, name='resultstext'),
+  url(r'^fixturestext/(?P<file_id>.+)/$', views.fixtures_text, name='fixturestext'),
+  path('table/', views.fill_table, name="fill-table"),
+  url(r'^login/$', views.login_view, name='login')
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # urlpatterns += staticfiles_urlpatterns()

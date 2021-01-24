@@ -7,6 +7,9 @@ from django.views.decorators.http import *
 from django.contrib import messages
 from django.template.defaulttags import register
 from django.core.paginator import Paginator
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 
 import services.FixturesService as FixturesServices
 import services.ResultsService as ResultsService
@@ -20,6 +23,21 @@ LEAGUE_PREFIX = 'league_'
 # Create your views here.
 def index(request):
     return fixtures(request, 1)
+
+
+def login_view(request):
+    if request.method == 'GET':
+        form = AuthenticationForm()
+    elif request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            if 'next' in request.POST:
+                return redirect(request.POST.get('next'))
+            # TODO: tmp redirect
+            return redirect('sunday_league:index')
+    return render(request, 'login.html', {'form': form})
 
 
 @require_GET
@@ -95,11 +113,12 @@ def information(request, league=1):
 
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
+@login_required(login_url="/login/")
 def uploadfixtures(request):
     # maybe not the best solution to allow GET method here
     if request.user.is_authenticated:
         FixturesServices.save_fixtures()
-        ResultsService.fill_table()
+        ResultsService.update_table()
         messages.success(request, "Razpored je bil dodan.")
         response = redirect("/admin/sundayleagueApp/file/")
         response.status_code = 303
@@ -110,20 +129,21 @@ def uploadfixtures(request):
 
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
+@login_required(login_url="/login/")
 def results(request, file_id=-1):
     # maybe not the best solution to allow GET method here
     if request.user.is_authenticated:
         if int(file_id) > 0:
             saved_results = ResultsService.save_results_for_file(file_id)
-            messages.success(request, "{} rezultatov je bilo vnesenih.".format(len(saved_results)))
-            ResultsService.fill_table()
-            messages.success(request, "Lestvica je bila posodobljena.")
+            if not saved_results:
+                messages.warning(request, "Datoteka z id-jem {} ne obstaja!".format(file_id))
+            else:
+                messages.success(request, "{} rezultatov je bilo vnesenih.".format(len(saved_results)))
+                ResultsService.update_table()
+                messages.success(request, "Lestvica je bila posodobljena.")
             response = redirect("/admin/sundayleagueApp/file/")
             response.status_code = 303
             return response
-
-        ResultsService.save_results()
-        print("Save all results")
         return redirect("/admin/sundayleagueApp/file/")
     else:
         return HttpResponse("Not authenticated", status=403)
@@ -150,7 +170,7 @@ def fixtures_text(request, file_id=-1):
 @csrf_exempt
 @require_POST
 def fill_table(request):
-    ResultsService.fill_table()
+    ResultsService.update_table()
     return HttpResponse("DONE")
 
 

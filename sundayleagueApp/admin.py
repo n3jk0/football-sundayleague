@@ -8,7 +8,7 @@ from django.conf.urls import url
 
 
 class MyAdminSite(admin.AdminSite):
-    login_template = 'templates/admin/login.html'
+    login_template = 'admin/login.html'
 
 
 class InformationAdmin(admin.ModelAdmin):
@@ -58,7 +58,7 @@ class FileAdmin(admin.ModelAdmin):
 
 
 # Register your models here.
-site = MyAdminSite()
+site = MyAdminSite(name='admin')
 
 site.register(User)
 site.register(Group)
