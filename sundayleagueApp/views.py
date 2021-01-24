@@ -35,8 +35,8 @@ def login_view(request):
             login(request, user)
             if 'next' in request.POST:
                 return redirect(request.POST.get('next'))
-            # TODO: tmp redirect
-            return redirect('sunday_league:index')
+            # TODO: redirect to result input page
+            return redirect('sunday_league:home')
     return render(request, 'login.html', {'form': form})
 
 

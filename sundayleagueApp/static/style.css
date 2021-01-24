@@ -17,3 +17,14 @@ footer {
     text-align:right;
     height: 4rem;
 }
+
+.login-form input {
+    display: block;
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 5px;
+}
+
+.errorlist {
+    color: darkred;
+}
