@@ -16,16 +16,16 @@ MATCH_HOURS = ['8:30', '9:40', '10:50', '12:00', '13:10', '14:20']
 
 # todo: more seasons
 def get_fixtures_text():
-    fixtures = File.objects.filter(is_fixture=True, already_read=False).all()
-    for fixture in fixtures:
+    files = File.objects.filter(is_fixture=True, already_read=False).all()
+    for file in files:
         return file.text_content if bool(file.text_content) else read_file(file)
     return ""
 
 
 def get_fixtures_text_by_id(file_id):
-    bilten = File.objects.filter(is_fixture=True, id=file_id)
-    if bilten.exists():
-        bilten = bilten.first()
+    file = File.objects.filter(is_fixture=True, id=file_id)
+    if file.exists():
+        file = file.first()
     else:
         print("File " + file_id + " doesn't exists.")
         return None
