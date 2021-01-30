@@ -1,3 +1,8 @@
+from io import BytesIO
+import docx2txt
+import re
+
+
 def read_file(file):
     with file.file_content.open(mode='rb') as f:
         print("Start reading file", file.file_content.name)

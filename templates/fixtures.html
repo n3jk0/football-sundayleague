@@ -7,38 +7,45 @@
         <button type="button" class="btn btn-light" disabled>
             Lige:
         </button>
-        <a href="fixtures/1/" role="button" class="btn {% if "1" == selected_league %}btn-light{% else %}btn-secondary{% endif %}">Liga 1</a>
-        <a href="fixtures/2/" role="button" class="btn {% if "2" == selected_league %}btn-light{% else %}btn-secondary{% endif %}">Liga 2</a>
-        <a href="fixtures/3/" role="button" class="btn {% if "3" == selected_league %}btn-light{% else %}btn-secondary{% endif %}">Liga 3</a>
-        <a href="fixtures/4/" role="button" class="btn {% if "4" == selected_league %}btn-light{% else %}btn-secondary{% endif %}">Liga 4</a>
+        <a href="fixtures/1/" role="button"
+           class="btn {% if "1" == selected_league %}btn-light{% else %}btn-secondary{% endif %}">Liga 1</a>
+        <a href="fixtures/2/" role="button"
+           class="btn {% if "2" == selected_league %}btn-light{% else %}btn-secondary{% endif %}">Liga 2</a>
+        <a href="fixtures/3/" role="button"
+           class="btn {% if "3" == selected_league %}btn-light{% else %}btn-secondary{% endif %}">Liga 3</a>
+        <a href="fixtures/4/" role="button"
+           class="btn {% if "4" == selected_league %}btn-light{% else %}btn-secondary{% endif %}">Liga 4</a>
     </div>
 {% endblock %}
 
 {% block content %}
     <div>
-        <a href="fixtures/{{ selected_league }}/" role="button" class="btn btn-light btn-lg">Rezultati</a>
-        <a href="standing/{{ selected_league }}/" role="button" class="btn btn-secondary btn-lg">Lestvica</a>
-        <a href="scorers/{{ selected_league }}/" role="button" class="btn btn-secondary btn-lg">Strelci</a>
-        <a href="information/{{ selected_league }}/" role="button" class="btn btn-secondary btn-lg">Obvestila</a>
+        <a href="fixtures/{{ selected_league }}/" role="button" class="btn btn-light">Rezultati</a>
+        <a href="standing/{{ selected_league }}/" role="button" class="btn btn-secondary">Lestvica</a>
+        <a href="scorers/{{ selected_league }}/" role="button" class="btn btn-secondary">Strelci</a>
+        <a href="information/{{ selected_league }}/" role="button" class="btn btn-secondary">Obvestila</a>
 
-        <a class="btn btn-light float-right" href="{{ request.path }}?round={{ request.GET.round|add:1 }}">&raquo;</a>
-        <a class="btn btn-secondary dropdown-toggle float-right" href="#" role="button" id="dropdownMenuLink"
-           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            {% if selected_round == None %}
-                Vsi krogi
-            {% else %}
-                Krog {{ selected_round }}
-            {% endif %}
-        </a>
-        <a class="btn btn-light float-right" href="{{ request.path }}?round={{ request.GET.round|add:-1 }}">&laquo;</a>
+        {% if request.GET.round %}
+            <a class="btn btn-light float-right"
+               href="{{ request.path }}?round={{ all_rounds|next_round:request.GET.round }}">&raquo;</a>
+            <a class="btn btn-secondary dropdown-toggle float-right" href="#" role="button" id="dropdownMenuLink"
+               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {% if selected_round == None %}
+                    Vsi krogi
+                {% else %}
+                    Krog {{ selected_round }}
+                {% endif %}
+            </a>
+            <a class="btn btn-light float-right"
+               href="{{ request.path }}?round={{ all_rounds|previous_round:request.GET.round }}">&laquo;</a>
 
-
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-            <a class="dropdown-item" href="{{ request.path }}?round=all">Vsi krogi</a>
-            {% for round in all_rounds %}
-                <a class="dropdown-item" href="{{ request.path }}?round={{ round.round_number }}">{{ round }}</a>
-            {% endfor %}
-        </div>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                <a class="dropdown-item" href="{{ request.path }}?round=all">Vsi krogi</a>
+                {% for round in all_rounds %}
+                    <a class="dropdown-item" href="{{ request.path }}?round={{ round.round_number }}">{{ round }}</a>
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
 
     {% for league, rounds_list in rounds.items %}
@@ -60,12 +67,14 @@
                                         {% if match.is_surrendered %}
                                             <td class="text-center" style="width: 17%"><a
                                                     onclick="toggleScore('score-details-{{ match.id }}')"
-                                                    style="color: black; cursor: pointer;">{{ match.first_team_score|default_if_none:"" }} - {{ match.second_team_score|default_if_none:"" }} (b.b.)</a>
+                                                    style="color: black; cursor: pointer;">{{ match.first_team_score|default_if_none:"" }}
+                                                - {{ match.second_team_score|default_if_none:"" }} (b.b.)</a>
                                             </td>
                                         {% else %}
                                             <td class="text-center" style="width: 17%"><a
                                                     onclick="toggleScore('score-details-{{ match.id }}')"
-                                                    style="color: black; cursor: pointer;">{{ match.first_team_score|default_if_none:"" }} - {{ match.second_team_score|default_if_none:"" }}</a></td>
+                                                    style="color: black; cursor: pointer;">{{ match.first_team_score|default_if_none:"" }}
+                                                - {{ match.second_team_score|default_if_none:"" }}</a></td>
                                         {% endif %}
                                         <td style="width: 40%">{{ match.second_team }}</td>
                                     </tr>
@@ -77,7 +86,7 @@
                                                     {% for gm_key2, gm_value2 in gm_value.items %}
                                                         {% if gm_key2 == match.first_team.id %}
                                                             {% for scorer in gm_value2 %}
-                                                    <p class="mb-1">{{ scorer }} &#9917;</p>
+                                                                <p class="mb-1">{{ scorer }} &#9917;</p>
                                                             {% endfor %}
                                                         {% endif %}
                                                     {% endfor %}
@@ -112,35 +121,37 @@
 {% endblock %}
 
 {% block standing %}
-    <div class="shadow p-2 shadow bg-light rounded">
-        <h3>Lestvica:</h3>
-        <table class="table table-sm">
-            <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Ekipa</th>
-                <th class="text-center" scope="col">GP</th>
-                <th class="text-center" scope="col">PTS</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for row in table_rows %}
+    {% if table_rows|length > 0 %}
+        <div class="shadow p-2 shadow bg-light rounded">
+            <h3>Lestvica:</h3>
+            <table class="table table-sm">
+                <thead>
                 <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td><a style="color: black;"
-                           href="fixtures/{{ selected_league }}/?round=all&team_id={{ row.team.id }}">{{ row.team }}</a>
-                    </td>
-                    <td class="text-center">{{ row.match_played }}</td>
-                    {% if row.penalty_points < 0 %}
-                        <td class="text-center">{{ row.points }}({{ row.penalty_points }})</td>
-                    {% else %}
-                        <td class="text-center">{{ row.points }}</td>
-                    {% endif %}
+                    <th scope="col">#</th>
+                    <th scope="col">Ekipa</th>
+                    <th class="text-center" scope="col">GP</th>
+                    <th class="text-center" scope="col">PTS</th>
                 </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                {% for row in table_rows %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><a style="color: black;"
+                               href="fixtures/{{ selected_league }}/?round=all&team_id={{ row.team.id }}">{{ row.team }}</a>
+                        </td>
+                        <td class="text-center">{{ row.match_played }}</td>
+                        {% if row.penalty_points < 0 %}
+                            <td class="text-center">{{ row.points }}({{ row.penalty_points }})</td>
+                        {% else %}
+                            <td class="text-center">{{ row.points }}</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
     {% if top_scorers|length > 0 %}
         </br>
         <div class="shadow p-2 shadow bg-light rounded">

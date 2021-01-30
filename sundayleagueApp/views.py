@@ -22,7 +22,20 @@ LEAGUE_PREFIX = 'league_'
 
 # Create your views here.
 def index(request):
-    return fixtures(request, 1)
+    # NOTE: this query works only on PostgresSQL
+    last_round_by_league = Round.objects.order_by('league_number', '-date').distinct('league_number').all()
+    rounds_group_by_league = {}
+    [rounds_group_by_league.setdefault(LEAGUE_PREFIX + str(r.league_number), []).append(r) for r in last_round_by_league]
+
+    all_matches = Match.objects.order_by("time").all()
+    matches_group_by_rounds = {}
+    [matches_group_by_rounds.setdefault(m.round_id, []).append(m) for m in all_matches]
+    # TODO: goals by match
+    return render(request, 'fixtures.html',
+                  {'matches': matches_group_by_rounds, 'rounds': rounds_group_by_league, 'all_rounds': [],
+                   'table_rows': [], 'selected_round': 0, 'selected_league': 1,
+                   'top_scorers': [],
+                   'goals_by_match': []})
 
 
 def login_view(request):
@@ -177,3 +190,26 @@ def fill_table(request):
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+@register.filter
+def next_round(all_rounds, current):
+    if current == "all":
+        return 'all'
+    current_round = all_rounds.get(round_number=current)
+    for i, r in enumerate(all_rounds):
+        if r == current_round:
+            next_round = all_rounds[i + 1] if i < len(all_rounds) - 1 else current_round
+            break
+    return next_round.round_number
+
+
+@register.filter
+def previous_round(all_rounds, current):
+    if current == "all":
+        return 'all'
+    current_round = all_rounds.get(round_number=current)
+    for i, r in enumerate(all_rounds):
+        if r == current_round:
+            previous_round = all_rounds[i - 1] if i > 0 else current_round
+            break
+    return previous_round.round_number

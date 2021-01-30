@@ -37,6 +37,7 @@ class FileAdmin(admin.ModelAdmin):
         'id',
         'uuid',
         'file_actions',
+        'text_content'
     )
 
     def get_urls(self):
@@ -57,7 +58,7 @@ class FileAdmin(admin.ModelAdmin):
                 # disabled button
                 return format_html("<a class=\"button\" disabled>Uvozi razpored</a>")
             return format_html(
-                "<a class=\"button\" href=\"/uploadfixtures/\" onclick='return confirm(\"Shranjevanje lahko traja nekaj časa. Ste prepričani da želite nadeljevati?\");'>Uvozi razpored</a>", )
+                "<a class=\"button\" href=\"/uploadfixtures/{}/\" onclick='return confirm(\"Shranjevanje lahko traja nekaj časa. Ste prepričani da želite nadeljevati?\");'>Uvozi razpored</a>", obj.id)
 
     file_actions.short_description = "Uvozi datoteko"
 
