@@ -28,3 +28,7 @@ footer {
 .errorlist {
     color: darkred;
 }
+
+.nounderline {
+    text-decoration: none !important
+}
