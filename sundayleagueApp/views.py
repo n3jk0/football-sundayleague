@@ -22,10 +22,16 @@ LEAGUE_PREFIX = 'league_'
 
 # Create your views here.
 def index(request):
+    today = datetime.date.today()
+    today_minus_3 = today - datetime.timedelta(days=3)
     # NOTE: this query works only on PostgresSQL
-    last_round_by_league = Round.objects.order_by('league_number', '-date').distinct('league_number').all()
+    # Show last results or next fixture by league
+    round_to_show_by_league = Round.objects.filter(date__gt=today_minus_3).order_by('league_number', 'date').distinct('league_number').all()
+    if not round_to_show_by_league:
+        # Last round by league
+        round_to_show_by_league = Round.objects.order_by('league_number', '-date').distinct('league_number').all()
     rounds_group_by_league = {}
-    [rounds_group_by_league.setdefault(LEAGUE_PREFIX + str(r.league_number), []).append(r) for r in last_round_by_league]
+    [rounds_group_by_league.setdefault(LEAGUE_PREFIX + str(r.league_number), []).append(r) for r in round_to_show_by_league]
 
     all_matches = Match.objects.order_by("time").all()
     matches_group_by_rounds = {}
@@ -58,11 +64,13 @@ def fixtures(request, league):
     selected_round = request.GET.get('round', None)
     selected_team_id = request.GET.get('team_id', None)
     all_rounds = Round.objects.filter(league_number=league).order_by('date')
+    if not all_rounds:
+        return redirect('sunday_league:home')
     if selected_round is None:
         today = datetime.date.today()
-        today_plus_4 = today + datetime.timedelta(days=4)
-        last_round = all_rounds.order_by('date').filter(date__lte=today_plus_4).last()
-        last_round_number = last_round.round_number if last_round else 1
+        today_minus_3 = today - datetime.timedelta(days=3)
+        last_round = all_rounds.filter(date__gt=today_minus_3).first()
+        last_round_number = last_round.round_number if last_round else all_rounds.last().round_number
         return redirect(request.path + "?round=" + str(last_round_number))
     filter_rounds = all_rounds
     if selected_round != 'all':
