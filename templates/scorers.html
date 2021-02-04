@@ -1,4 +1,4 @@
-{% extends 'core.html' %}
+{% extends 'base/core.html' %}
 
 {% block title %} Naj strelci {% endblock %}
 
@@ -16,10 +16,7 @@
 
 {% block content %}
     <div>
-        <a href="fixtures/{{ selected_league }}/" role="button" class="btn btn-secondary">Rezultati</a>
-        <a href="standing/{{ selected_league }}/" role="button" class="btn btn-secondary">Lestvica</a>
-        <a href="scorers/{{ selected_league }}/" role="button" class="btn btn-light">Strelci</a>
-        <a href="information/{{ selected_league }}/" role="button" class="btn btn-secondary">Obvestila</a>
+        {% include 'components/navigations.html' %}
     </div>
 
     <div class="shadow p-2 shadow bg-light min-vw-75 rounded">

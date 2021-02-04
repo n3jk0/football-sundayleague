@@ -26,12 +26,14 @@ def index(request):
     today_minus_3 = today - datetime.timedelta(days=3)
     # NOTE: this query works only on PostgresSQL
     # Show last results or next fixture by league
-    round_to_show_by_league = Round.objects.filter(date__gt=today_minus_3).order_by('league_number', 'date').distinct('league_number').all()
+    round_to_show_by_league = Round.objects.filter(date__gt=today_minus_3).order_by('league_number', 'date').distinct(
+        'league_number').all()
     if not round_to_show_by_league:
         # Last round by league
         round_to_show_by_league = Round.objects.order_by('league_number', '-date').distinct('league_number').all()
     rounds_group_by_league = {}
-    [rounds_group_by_league.setdefault(LEAGUE_PREFIX + str(r.league_number), []).append(r) for r in round_to_show_by_league]
+    [rounds_group_by_league.setdefault(LEAGUE_PREFIX + str(r.league_number), []).append(r) for r in
+     round_to_show_by_league]
 
     all_matches = Match.objects.order_by("time").all()
     matches_group_by_rounds = {}
@@ -54,8 +56,7 @@ def login_view(request):
             login(request, user)
             if 'next' in request.POST:
                 return redirect(request.POST.get('next'))
-            # TODO: redirect to result input page
-            return redirect('sunday_league:home')
+            return redirect('sunday_league:matches')
     return render(request, 'login.html', {'form': form})
 
 
@@ -132,6 +133,15 @@ def information(request, league=1):
     return render(request, 'information.html', {'last_information': last_information_text, 'selected_league': league})
 
 
+@require_GET
+@login_required(login_url="/login/")
+def matches(request, raound_id=-1):
+    profile = request.user.profile
+    user_team = profile.team
+    editable_rounds = Round.objects.all() if profile.is_admin else Round.objects.filter(home_team=user_team).all()
+    return render(request, 'matches.html', {'rounds': editable_rounds, 'render_logout_button': True})
+
+
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 @login_required(login_url="/login/")
@@ -198,6 +208,7 @@ def fill_table(request):
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
 
 @register.filter
 def next_round(all_rounds, current):

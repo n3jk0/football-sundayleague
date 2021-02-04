@@ -1,4 +1,4 @@
-{% extends 'core.html' %}
+{% extends 'base/core.html' %}
 
 {% block title %} Razpored {% endblock %}
 
@@ -20,10 +20,7 @@
 
 {% block content %}
     <div>
-        <a href="fixtures/{{ selected_league }}/" role="button" class="btn btn-light">Rezultati</a>
-        <a href="standing/{{ selected_league }}/" role="button" class="btn btn-secondary">Lestvica</a>
-        <a href="scorers/{{ selected_league }}/" role="button" class="btn btn-secondary">Strelci</a>
-        <a href="information/{{ selected_league }}/" role="button" class="btn btn-secondary">Obvestila</a>
+        {% include 'components/navigations.html' %}
 
         {% if request.GET.round %}
             <a class="btn btn-light float-right"

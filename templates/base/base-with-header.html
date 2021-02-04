@@ -1,0 +1,23 @@
+{% extends 'base/base.html' %}
+
+{% block body %}
+    <div class="d-flex flex-column bg">
+        <div id="header">
+            {% if render_logout_button %}
+                {# TODO: logout #}
+                <a class="d-flex justify-content-end text-white-50 nounderline pt-2 pr-3" href="{% url 'sunday_league:login' %}">Izpis</a>
+            {% else %}
+            {% endif %}
+            <a class="text-light nounderline" href="{% url 'sunday_league:home' %}"><h2 class="d-flex justify-content-center {% if not render_logout_button %}pt-4{% endif %}">Rekreativna liga Novo mesto</h2></a>
+        </div>
+        <div class="d-flex p-3 justify-content-center">
+            {% block content %}
+
+            {% endblock %}
+        </div>
+        <footer class="pr-3">
+            <p class="text-muted">Author: Nejc Kozlevčar<br>
+                <a class="text-muted" href="mailto:nejc.kozlevcar@gmail.com">nejc.kozlevcar@gmail.com</a></p>
+        </footer>
+    </div>
+{% endblock %}
