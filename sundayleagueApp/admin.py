@@ -19,9 +19,9 @@ class InformationAdmin(admin.ModelAdmin):
 class MatchAdmin(admin.ModelAdmin):
     list_display = ('id', '__str__')
 
-    def save_model(self, request, obj, form, change):
-        obj.save()
-        ResultsService.update_table()
+    # def save_model(self, request, obj, form, change):
+    #     obj.save()
+    #     ResultsService.update_table()
 
 
 class FileAdmin(admin.ModelAdmin):

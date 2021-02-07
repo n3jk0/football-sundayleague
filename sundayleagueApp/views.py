@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 from sundayleagueApp.models import *
+from sundayleagueApp.forms import *
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import *
@@ -8,7 +9,7 @@ from django.contrib import messages
 from django.template.defaulttags import register
 from django.core.paginator import Paginator
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 
 import services.FixturesService as FixturesServices
@@ -58,6 +59,12 @@ def login_view(request):
                 return redirect(request.POST.get('next'))
             return redirect('sunday_league:matches')
     return render(request, 'login.html', {'form': form})
+
+
+@require_POST
+def logout_view(request):
+    logout(request)
+    return redirect('sunday_league:home')
 
 
 @require_GET
@@ -133,13 +140,28 @@ def information(request, league=1):
     return render(request, 'information.html', {'last_information': last_information_text, 'selected_league': league})
 
 
-@require_GET
+@require_http_methods(["GET", "POST"])
 @login_required(login_url="/login/")
-def matches(request, raound_id=-1):
-    profile = request.user.profile
-    user_team = profile.team
-    editable_rounds = Round.objects.all() if profile.is_admin else Round.objects.filter(home_team=user_team).all()
-    return render(request, 'matches.html', {'rounds': editable_rounds, 'render_logout_button': True})
+def matches(request, round_id=-1):
+    round_id = int(round_id)
+    if round_id >= 0:
+        if request.method == 'POST':
+            if 'match_id' in request.POST:
+                match = Match.objects.get(id=request.POST.get('match_id'))
+                form = MatchForm(instance=match, data=request.POST)
+            if form.is_valid():
+                form.save()
+                ResultsService.update_table()
+        selected_round = Round.objects.get(id=round_id)
+        matches_for_round = Match.objects.filter(round=selected_round).order_by('time').all()
+        forms = [MatchForm(instance=m) for m in matches_for_round]
+        return render(request, 'modify-matches.html', {'selected_round': selected_round, 'matches': matches_for_round, 'forms': forms})
+    else:
+        profile = request.user.profile
+        user_team = profile.team
+        editable_rounds = Round.objects.all() if profile.is_admin else Round.objects.filter(home_team=user_team).all()
+        completed_rounds = dict(zip(editable_rounds, [r.all_match_completed() for r in editable_rounds]))
+        return render(request, 'matches.html', {'rounds': editable_rounds, 'completed_rounds': completed_rounds})
 
 
 @csrf_exempt

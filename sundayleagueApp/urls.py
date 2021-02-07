@@ -23,8 +23,9 @@ urlpatterns = [
   url(r'^fixturestext/(?P<file_id>.+)/$', views.fixtures_text, name='fixturestext'),
   path('table/', views.fill_table, name="fill-table"),
   url(r'^login/$', views.login_view, name='login'),
-  url(r'^matches/', views.matches, name='matches'),
-  url(r'^matches/(?P<round_id>.+)/$', views.matches, name='matches_by_round')
+  url(r'^logout/$', views.logout_view, name='logout'),
+  url(r'^matches/$', views.matches, name='matches'),
+  url(r'^matches/(?P<round_id>\d+)/$', views.matches, name='matches_by_round')
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # urlpatterns += staticfiles_urlpatterns()

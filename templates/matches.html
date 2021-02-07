@@ -10,7 +10,7 @@
             {% endif %}
             <div class="col">
                 <a class="nounderline text-dark" href="{% url 'sunday_league:matches_by_round' round_id=round.id %}">
-                    <div class="shadow p-2 bg-light rounded h-100">
+                    <div class="shadow p-2 bg-light rounded h-100 {% if  completed_rounds|get_item:round %}completed-round{% endif %}">
                         <b>LIGA: {{ round.league_number }}</b> <br/>
                         <i><b>Krog. {{ round.round_number }}</b></i>: {{ round.place }} <br/>
                         Domačin: {{ round.home_team }}
@@ -23,7 +23,7 @@
             {% endif %}
         {% endfor %}
         {# Add empty columns if needed #}
-        {# TODO: maybe fix with css #}
+        {# TODO: fix with css #}
         {% if not rounds|length|add:1|divisibleby:3 %}
             <div class="col"></div>
             <div class="col"></div>

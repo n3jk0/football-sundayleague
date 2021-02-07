@@ -25,6 +25,19 @@ footer {
     padding: 5px;
 }
 
+.completed-round{
+    opacity: 0.6;
+}
+
+.match-form input {
+    width: 4rem;
+    padding-left: 5px;
+}
+
+.match-form label {
+    padding-top: 3px;
+}
+
 .errorlist {
     color: darkred;
 }
