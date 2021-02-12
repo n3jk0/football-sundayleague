@@ -57,7 +57,7 @@ def login_view(request):
             login(request, user)
             if 'next' in request.POST:
                 return redirect(request.POST.get('next'))
-            return redirect('dashboard')
+            return redirect('sunday_league:dashboard')
     return render(request, 'login.html', {'form': form})
 
 
