@@ -1,0 +1,16 @@
+{% extends 'base/base.html' %}
+
+{% block body %}
+    <div class="d-flex flex-column bg">
+        {% include 'components/header.html' %}
+        <div class="d-flex p-3 justify-content-center">
+            {% block content %}
+
+            {% endblock %}
+        </div>
+        <footer class="pr-3">
+            <p class="text-muted">Author: Nejc Kozlevčar<br>
+                <a class="text-muted" href="mailto:nejc.kozlevcar@gmail.com">nejc.kozlevcar@gmail.com</a></p>
+        </footer>
+    </div>
+{% endblock %}

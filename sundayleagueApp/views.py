@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 from sundayleagueApp.models import *
+from sundayleagueApp.forms import *
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import *
@@ -8,7 +9,7 @@ from django.contrib import messages
 from django.template.defaulttags import register
 from django.core.paginator import Paginator
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 
 import services.FixturesService as FixturesServices
@@ -26,12 +27,14 @@ def index(request):
     today_minus_3 = today - datetime.timedelta(days=3)
     # NOTE: this query works only on PostgresSQL
     # Show last results or next fixture by league
-    round_to_show_by_league = Round.objects.filter(date__gt=today_minus_3).order_by('league_number', 'date').distinct('league_number').all()
+    round_to_show_by_league = Round.objects.filter(date__gt=today_minus_3).order_by('league_number', 'date').distinct(
+        'league_number').all()
     if not round_to_show_by_league:
         # Last round by league
         round_to_show_by_league = Round.objects.order_by('league_number', '-date').distinct('league_number').all()
     rounds_group_by_league = {}
-    [rounds_group_by_league.setdefault(LEAGUE_PREFIX + str(r.league_number), []).append(r) for r in round_to_show_by_league]
+    [rounds_group_by_league.setdefault(LEAGUE_PREFIX + str(r.league_number), []).append(r) for r in
+     round_to_show_by_league]
 
     all_matches = Match.objects.order_by("time").all()
     matches_group_by_rounds = {}
@@ -54,9 +57,14 @@ def login_view(request):
             login(request, user)
             if 'next' in request.POST:
                 return redirect(request.POST.get('next'))
-            # TODO: redirect to result input page
-            return redirect('sunday_league:home')
+            return redirect('dashboard')
     return render(request, 'login.html', {'form': form})
+
+
+@require_POST
+def logout_view(request):
+    logout(request)
+    return redirect('sunday_league:home')
 
 
 @require_GET
@@ -126,12 +134,107 @@ def scorers(request, league):
     return render(request, 'scorers.html', {'selected_league': league, 'page_scorers': page_scorers})
 
 
+@require_GET
 def information(request, league=1):
     last_information = Information.objects.order_by("-pk")
     last_information_text = last_information[0].info if last_information.exists() else ""
     return render(request, 'information.html', {'last_information': last_information_text, 'selected_league': league})
 
 
+@require_GET
+@login_required(login_url="/login/")
+def dashboard(request):
+    profile = request.user.profile
+    user_team = profile.team
+    editable_rounds = Round.objects.all() if profile.is_admin else Round.objects.filter(home_team=user_team).all()
+    completed_rounds = dict(zip(editable_rounds, [r.all_match_completed() for r in editable_rounds]))
+    return render(request, 'dashboard.html', {'profile':profile, 'rounds': editable_rounds, 'completed_rounds': completed_rounds})
+
+
+@require_http_methods(["GET", "POST"])
+@login_required(login_url="/login/")
+def modify_matches(request, round_id=-1):
+    info_messages = []
+    round_id = int(round_id)
+    if round_id >= 0:
+        if request.method == 'POST':
+            if 'match_id' in request.POST:
+                match = Match.objects.get(id=request.POST.get('match_id'))
+                form = MatchForm(instance=match, data=request.POST)
+            if form.is_valid():
+                form.save()
+                ResultsService.update_table()
+                info_messages.append("Rezultat je shranjen")
+        try:
+            selected_round = Round.objects.get(id=round_id)
+            profile = request.user.profile
+            if not profile.is_admin and selected_round.home_team != profile.team:
+                print('User:', profile.user, "doesn't have privileges for round", selected_round)
+                return redirect('dashboard')
+        except Round.DoesNotExist:
+            print('Round with id', round_id, "doesn't exists")
+            return redirect('dashboard')
+        matches_for_round = Match.objects.filter(round=selected_round).order_by('time').all()
+        forms = [MatchForm(instance=m) for m in matches_for_round]
+        return render(request, 'modify-matches.html', {'selected_round': selected_round, 'matches': matches_for_round, 'forms': forms, "info_messages": info_messages})
+
+
+@require_http_methods(["GET", "POST"])
+@login_required(login_url="/login/")
+def upload_results(request):
+    profile = request.user.profile
+    if not profile.is_admin:
+        return redirect('sunday_league:dashboard')
+
+    info_messages = []
+    warn_messages = []
+    if request.method == 'GET':
+        form = FileForm()
+    elif request.method == 'POST':
+        form = FileForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = form.save()
+            file_id = file.id
+            saved_results = ResultsService.save_results_for_file(file_id)
+            if not saved_results:
+                warn_messages.append("Datoteka z id-jem {} ne obstaja!".format(file_id))
+            else:
+                info_messages.append("{} rezultatov je bilo vnesenih.".format(len(saved_results)))
+                ResultsService.update_table()
+                info_messages.append("Lestvica je bila posodobljena.")
+        else:
+            warn_messages.append("Prišlo je do napake.")
+
+    return render(request, 'upload-results.html', {'form': form, 'info_messages': info_messages, 'warn_messages': warn_messages})
+
+
+@require_http_methods(["GET", "POST"])
+@login_required(login_url="/login/")
+def modify_information(request, last):
+    profile = request.user.profile
+    if not profile.is_admin:
+        return redirect('sunday_league:dashboard')
+
+    info_messages = []
+    if request.method == 'GET':
+        form = InformationForm()
+        if last:
+            last_information = Information.objects.order_by("-pk").first()
+            form = InformationForm(instance=last_information)
+    elif request.method == 'POST':
+        form = InformationForm(data=request.POST)
+        if 'information_id' in request.POST:
+            match = InformationForm.objects.get(id=request.POST.get('information_id'))
+            form = InformationForm(instance=match, data=request.POST)
+        if form.is_valid():
+            form.save()
+            info_messages.append("Obvestilo je shranjen")
+
+    return render(request, "modify-information.html", {"form": form, "info_messages": info_messages, "last":last})
+
+
+# TODO: remove
+# DEPRECATED: Method called from django admin
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 @login_required(login_url="/login/")
@@ -148,6 +251,8 @@ def uploadfixtures(request):
         return HttpResponse("Not authenticated", status=403)
 
 
+# TODO: remove
+# DEPRECATED: Method called from django admin
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 @login_required(login_url="/login/")
@@ -188,16 +293,10 @@ def fixtures_text(request, file_id=-1):
     return HttpResponse(text)
 
 
-@csrf_exempt
-@require_POST
-def fill_table(request):
-    ResultsService.update_table()
-    return HttpResponse("DONE")
-
-
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
 
 @register.filter
 def next_round(all_rounds, current):

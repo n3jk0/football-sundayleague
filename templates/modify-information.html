@@ -1,0 +1,26 @@
+{% extends 'base/base-with-header.html' %}
+{% load widget_tweaks %}
+
+{% block title %} Uredi obvestilo {% endblock %}
+
+{% block content %}
+    <div class="shadow rounded p-3 bg-light w-50">
+        {% if last %}
+            <a class="text-dark nounderline" href="{% url 'sunday_league:modify_information' %}">Dodaj novo obvestilo</a>
+        {% else %}
+            <a class="text-dark nounderline" href="{% url 'sunday_league:modify_last_information' %}">Uredi zadnje obvestilo</a>
+        {% endif %}
+
+        <hr/>
+        <form class="d-flex flex-column" method="post">
+            {% csrf_token %}
+            {% if last %}<h2>Uredi zadnje obvestilo</h2>{% else %}<h2>Spremeni obvestilo</h2>{% endif %}
+            {% render_field form.info class="form-control" %}
+            <br/>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-dark" type="submit" value="Shrani">Shrani</button>
+            </div>
+        </form>
+        <a class="text-dark nounderline p-2" href="{% url 'sunday_league:dashboard' %}"><b>Nazaj</b></a>
+    </div>
+{% endblock %}

@@ -2,6 +2,9 @@ import uuid
 from enum import Enum
 
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 # todo: can't delete because of migrations
@@ -29,6 +32,25 @@ class Team(models.Model):
         return self.name
 
 
+# Basiclly user with additional fields
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, blank=False)
+    team = models.OneToOneField(Team, on_delete=models.SET_NULL, null=True)
+    is_admin = models.BooleanField(default=False)
+
+    @receiver(post_save, sender=User)
+    def create_user_profile(sender, instance, created, **kwargs):
+        if created:
+            Profile.objects.create(user=instance)
+
+    @receiver(post_save, sender=User)
+    def save_user_profile(sender, instance, **kwargs):
+        instance.profile.save()
+
+    def __str__(self):
+        return "{} - ({})".format(self.user.username, self.team)
+
+
 class Round(models.Model):
     round_number = models.IntegerField(default=0)
     place = models.CharField(max_length=200)
@@ -36,9 +58,11 @@ class Round(models.Model):
     league_number = models.IntegerField(default=0)
     home_team = models.ForeignKey(Team, on_delete=models.CASCADE)
 
+    def all_match_completed(self):
+        return all(m.is_completed() for m in self.match_set.all())
+
     def __str__(self):
-        return "KROG. {} - {} ({})".format(
-            self.round_number, self.place, self.home_team.__str__())
+        return "KROG. {} - {} ({})".format(self.round_number, self.place, self.home_team.__str__())
 
 
 class Match(models.Model):
@@ -46,9 +70,12 @@ class Match(models.Model):
     first_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, related_name='first_team')
     second_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, related_name='second_team')
     time = models.TimeField()
-    first_team_score = models.IntegerField(null=True, blank=True)
-    second_team_score = models.IntegerField(null=True, blank=True)
+    first_team_score = models.PositiveIntegerField(null=True, blank=True)
+    second_team_score = models.PositiveIntegerField(null=True, blank=True)
     is_surrendered = models.BooleanField(default=False)
+
+    def is_completed(self):
+        return self.first_team_score is not None and self.second_team_score is not None
 
     def __str__(self):
         return "{} ({}-{}) {}".format(self.first_team, self.first_team_score, self.second_team_score, self.second_team)
@@ -96,11 +123,13 @@ class Player(models.Model):
         return "{} {} ({})".format(self.first_name, self.family_name, self.team)
 
 
+# TODO: Rename to MatchGoal
 class MatchGoals(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     scorer = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='scorer')
-    assistant = models.ForeignKey(Player, on_delete=models.CASCADE, default=None, null=True, blank=True, related_name='assistant')
+    assistant = models.ForeignKey(Player, on_delete=models.CASCADE, default=None, null=True, blank=True,
+                                  related_name='assistant')
 
     def __str__(self):
         return "{} ({})".format(self.scorer.name(), self.match)

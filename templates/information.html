@@ -1,4 +1,4 @@
-{% extends 'core.html' %}
+{% extends 'base/core.html' %}
 
 {% block title %} Obvestila {% endblock %}
 
@@ -7,10 +7,7 @@
 
 {% block content %}
     <div>
-        <a href="fixtures/{{ selected_league }}/" role="button" class="btn btn-secondary">Rezultati</a>
-        <a href="standing/{{ selected_league }}/" role="button" class="btn btn-secondary">Lestvica</a>
-        <a href="scorers/{{ selected_league }}/" role="button" class="btn btn-secondary">Strelci</a>
-        <a href="information/{{ selected_league }}/" role="button" class="btn btn-light">Obvestila</a>
+        {% include 'components/navigations.html' %}
     </div>
     <div class="shadow p-2 bg-light rounded">
         <h3>Obvestila:</h3>

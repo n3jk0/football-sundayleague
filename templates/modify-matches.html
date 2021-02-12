@@ -1,0 +1,43 @@
+{% extends 'base/base-with-header.html' %}
+{% load widget_tweaks %}
+
+{% block title %} Moje tekme {% endblock %}
+
+{% block content %}
+    {# TODO: responsive (w-75 for desktop, w-100 for mobile) #}
+    <div class="d-flex flex-column w-100">
+        <div class="shadow rounded p-3 bg-light">
+            <h5><b>LIGA: {{ selected_round.league_number }}</b> <br/>
+                <i><b>Krog. {{ selected_round.round_number }}</b></i>: {{ selected_round.place }} <br/>
+                Domačin: {{ selected_round.home_team }}</h5>
+            <hr/>
+
+            {% for info in info_messages %}
+                <div class="alert alert-info" role="alert">
+                    {{ info }}
+                </div>
+            {% endfor %}
+
+            {% for form in forms %}
+                {% with form_id=form.instance.id|stringformat:"i" %}
+                    {% with first_team_score_id="first_team_score_"|add:form_id second_team_score_id="second_team_score_"|add:form_id %}
+                        <form id="match-{{ form.instance.id }}" class="d-flex match-form" method="post">
+                            {% csrf_token %}
+                            <div class="row pl-2 w-100">
+                                <input type="hidden" name="match_id" value="{{ form.instance.id }}">
+                                <label class="col form-label" for="{{ first_team_score_id }}">{{ form.instance.first_team }}</label>
+                                {% render_field form.first_team_score id=first_team_score_id %}
+                                <label class="col form-label" for="{{ second_team_score_id }}">{{ form.instance.second_team }}</label>
+                                {% render_field form.second_team_score id=second_team_score_id %}
+                                <button class="btn btn-sm btn-dark ml-5 col-auto" type="submit" value="Shrani">Shrani
+                                </button>
+                            </div>
+                        </form>
+                    {% endwith %}
+                {% endwith %}
+                <hr/>
+            {% endfor %}
+            <a class="text-dark nounderline p-2" href="{% url 'sunday_league:dashboard' %}"><b>Nazaj</b></a>
+        </div>
+    </div>
+{% endblock %}
