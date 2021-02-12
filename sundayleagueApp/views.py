@@ -57,7 +57,7 @@ def login_view(request):
             login(request, user)
             if 'next' in request.POST:
                 return redirect(request.POST.get('next'))
-            return redirect('sunday_league:matches')
+            return redirect('dashboard')
     return render(request, 'login.html', {'form': form})
 
 
@@ -134,15 +134,27 @@ def scorers(request, league):
     return render(request, 'scorers.html', {'selected_league': league, 'page_scorers': page_scorers})
 
 
+@require_GET
 def information(request, league=1):
     last_information = Information.objects.order_by("-pk")
     last_information_text = last_information[0].info if last_information.exists() else ""
     return render(request, 'information.html', {'last_information': last_information_text, 'selected_league': league})
 
 
+@require_GET
+@login_required(login_url="/login/")
+def dashboard(request):
+    profile = request.user.profile
+    user_team = profile.team
+    editable_rounds = Round.objects.all() if profile.is_admin else Round.objects.filter(home_team=user_team).all()
+    completed_rounds = dict(zip(editable_rounds, [r.all_match_completed() for r in editable_rounds]))
+    return render(request, 'dashboard.html', {'profile':profile, 'rounds': editable_rounds, 'completed_rounds': completed_rounds})
+
+
 @require_http_methods(["GET", "POST"])
 @login_required(login_url="/login/")
-def matches(request, round_id=-1):
+def modify_matches(request, round_id=-1):
+    info_messages = []
     round_id = int(round_id)
     if round_id >= 0:
         if request.method == 'POST':
@@ -152,18 +164,77 @@ def matches(request, round_id=-1):
             if form.is_valid():
                 form.save()
                 ResultsService.update_table()
-        selected_round = Round.objects.get(id=round_id)
+                info_messages.append("Rezultat je shranjen")
+        try:
+            selected_round = Round.objects.get(id=round_id)
+            profile = request.user.profile
+            if not profile.is_admin and selected_round.home_team != profile.team:
+                print('User:', profile.user, "doesn't have privileges for round", selected_round)
+                return redirect('dashboard')
+        except Round.DoesNotExist:
+            print('Round with id', round_id, "doesn't exists")
+            return redirect('dashboard')
         matches_for_round = Match.objects.filter(round=selected_round).order_by('time').all()
         forms = [MatchForm(instance=m) for m in matches_for_round]
-        return render(request, 'modify-matches.html', {'selected_round': selected_round, 'matches': matches_for_round, 'forms': forms})
-    else:
-        profile = request.user.profile
-        user_team = profile.team
-        editable_rounds = Round.objects.all() if profile.is_admin else Round.objects.filter(home_team=user_team).all()
-        completed_rounds = dict(zip(editable_rounds, [r.all_match_completed() for r in editable_rounds]))
-        return render(request, 'matches.html', {'rounds': editable_rounds, 'completed_rounds': completed_rounds})
+        return render(request, 'modify-matches.html', {'selected_round': selected_round, 'matches': matches_for_round, 'forms': forms, "info_messages": info_messages})
 
 
+@require_http_methods(["GET", "POST"])
+@login_required(login_url="/login/")
+def upload_results(request):
+    profile = request.user.profile
+    if not profile.is_admin:
+        return redirect('sunday_league:dashboard')
+
+    info_messages = []
+    warn_messages = []
+    if request.method == 'GET':
+        form = FileForm()
+    elif request.method == 'POST':
+        form = FileForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = form.save()
+            file_id = file.id
+            saved_results = ResultsService.save_results_for_file(file_id)
+            if not saved_results:
+                warn_messages.append("Datoteka z id-jem {} ne obstaja!".format(file_id))
+            else:
+                info_messages.append("{} rezultatov je bilo vnesenih.".format(len(saved_results)))
+                ResultsService.update_table()
+                info_messages.append("Lestvica je bila posodobljena.")
+        else:
+            warn_messages.append("Prišlo je do napake.")
+
+    return render(request, 'upload-results.html', {'form': form, 'info_messages': info_messages, 'warn_messages': warn_messages})
+
+
+@require_http_methods(["GET", "POST"])
+@login_required(login_url="/login/")
+def modify_information(request, last):
+    profile = request.user.profile
+    if not profile.is_admin:
+        return redirect('sunday_league:dashboard')
+
+    info_messages = []
+    if request.method == 'GET':
+        form = InformationForm()
+        if last:
+            last_information = Information.objects.order_by("-pk").first()
+            form = InformationForm(instance=last_information)
+    elif request.method == 'POST':
+        form = InformationForm(data=request.POST)
+        if 'information_id' in request.POST:
+            match = InformationForm.objects.get(id=request.POST.get('information_id'))
+            form = InformationForm(instance=match, data=request.POST)
+        if form.is_valid():
+            form.save()
+            info_messages.append("Obvestilo je shranjen")
+
+    return render(request, "modify-information.html", {"form": form, "info_messages": info_messages, "last":last})
+
+
+# TODO: remove
+# DEPRECATED: Method called from django admin
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 @login_required(login_url="/login/")
@@ -180,6 +251,8 @@ def uploadfixtures(request):
         return HttpResponse("Not authenticated", status=403)
 
 
+# TODO: remove
+# DEPRECATED: Method called from django admin
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 @login_required(login_url="/login/")
@@ -218,13 +291,6 @@ def results_text(request, file_id=-1):
 def fixtures_text(request, file_id=-1):
     text = FixturesServices.get_fixtures_text()
     return HttpResponse(text)
-
-
-@csrf_exempt
-@require_POST
-def fill_table(request):
-    ResultsService.update_table()
-    return HttpResponse("DONE")
 
 
 @register.filter

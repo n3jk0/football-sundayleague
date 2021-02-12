@@ -1,0 +1,44 @@
+{% extends 'base/base-with-header.html' %}
+{% load widget_tweaks %}
+
+{% block title %} Uvozi rezultate {% endblock %}
+
+{% block content %}
+    <div class="shadow rounded p-3 bg-light w-50">
+        <form class="d-flex flex-column match-form" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="w-100">
+                <h2>Uvozi rezultate</h2>
+                {% for info in info_messages %}
+                    <div class="alert alert-info" role="alert">
+                        {{ info }}
+                    </div>
+                {% endfor %}
+
+                {% for warn in warn_messages %}
+                    <div class="alert alert-warning" role="alert">
+                        {{ warn }}
+                    </div>
+                {% endfor %}
+                <i class="text-secondary">Datotek mora biti v .docx formatu.</i>
+                <div class="custom-file">
+                    {% render_field form.file_content class="custom-file-input" id="resultsFile" accept=".docx" %}
+                    <label class="p-2 custom-file-label" for="resultsFile">Uvozi rezultate</label>
+                </div>
+
+            </div>
+            <br/>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-dark" type="submit" value="Shrani">Uvozi</button>
+            </div>
+        </form>
+        <a class="text-dark nounderline p-2" href="{% url 'sunday_league:dashboard' %}"><b>Nazaj</b></a>
+    </div>
+    <script>
+        // Add the following code if you want the name of the file appear on select
+        $(".custom-file-input").on("change", function () {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+    </script>
+{% endblock %}

@@ -21,11 +21,13 @@ urlpatterns = [
   url(r'^results/(?P<file_id>.+)/$', views.results, name='results-by-id'),
   url(r'^resultstext/(?P<file_id>.+)/$', views.results_text, name='resultstext'),
   url(r'^fixturestext/(?P<file_id>.+)/$', views.fixtures_text, name='fixturestext'),
-  path('table/', views.fill_table, name="fill-table"),
   url(r'^login/$', views.login_view, name='login'),
   url(r'^logout/$', views.logout_view, name='logout'),
-  url(r'^matches/$', views.matches, name='matches'),
-  url(r'^matches/(?P<round_id>\d+)/$', views.matches, name='matches_by_round')
+  url(r'^dashboard/$', views.dashboard, name='dashboard'),
+  url(r'^matches/(?P<round_id>\d+)/$', views.modify_matches, name='matches_by_round'),
+  url(r'^uploadresults/$', views.upload_results, name='upload_results'),
+  url(r'^modifyinformation/$', views.modify_information, {'last': False}, name='modify_information'),
+  url(r'^modifyinformation/last$', views.modify_information, {'last': True}, name='modify_last_information')
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # urlpatterns += staticfiles_urlpatterns()
