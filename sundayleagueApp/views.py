@@ -228,7 +228,7 @@ def modify_information(request, last):
             form = InformationForm(instance=match, data=request.POST)
         if form.is_valid():
             form.save()
-            info_messages.append("Obvestilo je shranjen")
+            info_messages.append("Obvestilo je shranjeno.")
 
     return render(request, "modify-information.html", {"form": form, "info_messages": info_messages, "last":last})
 

@@ -12,6 +12,11 @@
         {% endif %}
 
         <hr/>
+        {% for info in info_messages %}
+            <div class="alert alert-info" role="alert">
+                {{ info }}
+            </div>
+        {% endfor %}
         <form class="d-flex flex-column" method="post">
             {% csrf_token %}
             {% if last %}<h2>Uredi zadnje obvestilo</h2>{% else %}<h2>Spremeni obvestilo</h2>{% endif %}
