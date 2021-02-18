@@ -102,7 +102,6 @@ def update_table():
 
     for team in teams:
         row, created = TableRow.objects.get_or_create(team=team)
-        print(row, created)
         # clean
         if not created:
             row.match_played = 0

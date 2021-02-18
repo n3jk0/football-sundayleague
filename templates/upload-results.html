@@ -9,17 +9,8 @@
             {% csrf_token %}
             <div class="w-100">
                 <h2>Uvozi rezultate</h2>
-                {% for info in info_messages %}
-                    <div class="alert alert-info" role="alert">
-                        {{ info }}
-                    </div>
-                {% endfor %}
+                {% include 'components/messages.html' %}
 
-                {% for warn in warn_messages %}
-                    <div class="alert alert-warning" role="alert">
-                        {{ warn }}
-                    </div>
-                {% endfor %}
                 <i class="text-secondary">Datotek mora biti v .docx formatu.</i>
                 <div class="custom-file">
                     {% render_field form.file_content class="custom-file-input" id="resultsFile" accept=".docx" %}
