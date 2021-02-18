@@ -160,7 +160,6 @@ def modify_matches(request, round_id=-1):
             if 'match_id' in request.POST:
                 match_id = request.POST.get('match_id')
                 match = Match.objects.get(id=match_id)
-                change_match_status(request, match)
                 form = MatchForm(instance=match, data=request.POST)
             if form.is_valid():
                 form.save()
@@ -180,11 +179,6 @@ def modify_matches(request, round_id=-1):
         forms = [MatchForm(instance=m) for m in matches_for_round]
         return render(request, 'modify-matches.html', {'selected_round': selected_round, 'matches': matches_for_round, 'forms': forms})
 
-
-# TODO
-def change_match_status(request, match):
-    if 'is_live' in request.POST and request.POST.get('is_live') == 'on':
-        match.status = Match.MatchStatus.LIVE
 
 @require_http_methods(["GET", "POST"])
 @login_required(login_url="/login/")
