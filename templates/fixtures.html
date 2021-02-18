@@ -59,7 +59,7 @@
                                 <tbody>
                                 {% for match in match_list %}
                                     <tr>
-                                        <td style="width: 5%">{{ match.time|date:'H:i' }}</td>
+                                        <td class="{{ match|status_class }}" style="width: 5%">{{ match.time|date:'H:i' }}</td>
                                         <td class="text-right" style="width: 40%">{{ match.first_team }}</td>
                                         {% if match.is_surrendered %}
                                             <td class="text-center" style="width: 17%"><a

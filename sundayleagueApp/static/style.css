@@ -46,6 +46,31 @@ footer {
     text-decoration: none !important
 }
 
+.liveMatch {
+    border-left: 6px solid darkgreen;
+    animation: blinkingBorder 1s infinite;
+}
+
+@keyframes blinkingBorder {
+    0% {
+        border-left: 6px solid darkgreen;
+    }
+    50% {
+        border-left: 6px solid #2ab149;
+    }
+    100% {
+        border-left: 6px solid darkgreen;
+    }
+}
+
+.endMatch {
+    border-left: 6px solid #6d0000;
+}
+
+.confirmedMatch {
+    border-left: 6px solid #6c757d;
+}
+
 #contentDiv {
     min-width: 66%;
 }

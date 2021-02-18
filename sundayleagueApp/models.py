@@ -5,6 +5,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.translation import gettext_lazy as _
 
 
 # todo: can't delete because of migrations
@@ -67,6 +68,12 @@ class Round(models.Model):
 
 
 class Match(models.Model):
+
+    class MatchStatus(models.TextChoices):
+        NOT_STARTED = 'NOT_STARTED', _('Najavljena')
+        LIVE = 'LIVE', _('V živo')
+        COMPLETED = 'COMPLETED', _('Zaključena')
+        CONFIRMED = 'CONFIRMED', _('Potrjena')
     round = models.ForeignKey(Round, on_delete=models.CASCADE)
     first_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, related_name='first_team')
     second_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, related_name='second_team')
@@ -74,6 +81,7 @@ class Match(models.Model):
     first_team_score = models.PositiveIntegerField(null=True, blank=True)
     second_team_score = models.PositiveIntegerField(null=True, blank=True)
     is_surrendered = models.BooleanField(default=False)
+    status = models.CharField(max_length=32, choices=MatchStatus.choices, default=MatchStatus.NOT_STARTED)
 
     def is_completed(self):
         return self.first_team_score is not None and self.second_team_score is not None

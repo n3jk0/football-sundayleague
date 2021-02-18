@@ -1,0 +1,8 @@
+{% if messages %}
+    {# TODO: warning, error messages #}
+    <div class="alert alert-info alert-dismissible">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+{% endif %}

@@ -154,17 +154,18 @@ def dashboard(request):
 @require_http_methods(["GET", "POST"])
 @login_required(login_url="/login/")
 def modify_matches(request, round_id=-1):
-    info_messages = []
     round_id = int(round_id)
     if round_id >= 0:
         if request.method == 'POST':
             if 'match_id' in request.POST:
-                match = Match.objects.get(id=request.POST.get('match_id'))
+                match_id = request.POST.get('match_id')
+                match = Match.objects.get(id=match_id)
                 form = MatchForm(instance=match, data=request.POST)
             if form.is_valid():
                 form.save()
                 ResultsService.update_table()
-                info_messages.append("Rezultat je shranjen")
+                messages.success(request, "Rezultat je shranjen")
+                return redirect('sunday_league:matches_by_round', round_id=round_id)
         try:
             selected_round = Round.objects.get(id=round_id)
             profile = request.user.profile
@@ -176,7 +177,7 @@ def modify_matches(request, round_id=-1):
             return redirect('dashboard')
         matches_for_round = Match.objects.filter(round=selected_round).order_by('time').all()
         forms = [MatchForm(instance=m) for m in matches_for_round]
-        return render(request, 'modify-matches.html', {'selected_round': selected_round, 'matches': matches_for_round, 'forms': forms, "info_messages": info_messages})
+        return render(request, 'modify-matches.html', {'selected_round': selected_round, 'matches': matches_for_round, 'forms': forms})
 
 
 @require_http_methods(["GET", "POST"])
@@ -186,8 +187,6 @@ def upload_results(request):
     if not profile.is_admin:
         return redirect('sunday_league:dashboard')
 
-    info_messages = []
-    warn_messages = []
     if request.method == 'GET':
         form = FileForm()
     elif request.method == 'POST':
@@ -197,15 +196,15 @@ def upload_results(request):
             file_id = file.id
             saved_results = ResultsService.save_results_for_file(file_id)
             if not saved_results:
-                warn_messages.append("Datoteka z id-jem {} ne obstaja!".format(file_id))
+                messages.warning(request, "Datoteka z id-jem {} ne obstaja!".format(file_id))
             else:
-                info_messages.append("{} rezultatov je bilo vnesenih.".format(len(saved_results)))
+                messages.success(request, "{} rezultatov je bilo vnesenih.".format(len(saved_results)))
                 ResultsService.update_table()
-                info_messages.append("Lestvica je bila posodobljena.")
+                messages.success(request, "Lestvica je bila posodobljena.")
         else:
             warn_messages.append("Prišlo je do napake.")
 
-    return render(request, 'upload-results.html', {'form': form, 'info_messages': info_messages, 'warn_messages': warn_messages})
+    return render(request, 'upload-results.html', {'form': form})
 
 
 @require_http_methods(["GET", "POST"])
@@ -320,3 +319,13 @@ def previous_round(all_rounds, current):
             previous_round = all_rounds[i - 1] if i > 0 else current_round
             break
     return previous_round.round_number
+
+
+@register.filter
+def status_class(match):
+    if match.status == match.MatchStatus.LIVE:
+        return 'liveMatch'
+    elif match.status == match.MatchStatus.COMPLETED:
+        return 'endMatch'
+    else:
+        return 'confirmedMatch'
