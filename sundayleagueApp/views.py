@@ -201,10 +201,40 @@ def upload_results(request):
                 messages.success(request, "{} rezultatov je bilo vnesenih.".format(len(saved_results)))
                 ResultsService.update_table()
                 messages.success(request, "Lestvica je bila posodobljena.")
+            return redirect('sunday_league:upload_results')
         else:
             warn_messages.append("Prišlo je do napake.")
 
-    return render(request, 'upload-results.html', {'form': form})
+    return render(request, 'upload-file.html', {'form': form, "fixtures_upload": False})
+
+
+@require_http_methods(["GET", "POST"])
+@login_required(login_url="/login/")
+def upload_fixtures(request):
+    profile = request.user.profile
+    if not profile.is_admin:
+        return redirect('sunday_league:dashboard')
+
+    if request.method == 'GET':
+        form = FileForm()
+    elif request.method == 'POST':
+        form = FileForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = form.save()
+            file.is_fixture = True
+            file_id = file.id
+            file.save()
+            saved_results = FixturesServices.save_fixtures_for_file(file_id)
+            if not saved_results:
+                messages.warning(request, "Datoteka z id-jem {} ne obstaja!".format(file_id))
+            else:
+                ResultsService.update_table()
+                messages.success(request, "Razpored je bil dodan.")
+            return redirect('sunday_league:upload_fixtures')
+        else:
+            warn_messages.append("Prišlo je do napake.")
+
+    return render(request, 'upload-file.html', {'form': form, "fixtures_upload": True})
 
 
 @require_http_methods(["GET", "POST"])
@@ -214,7 +244,6 @@ def modify_information(request, last):
     if not profile.is_admin:
         return redirect('sunday_league:dashboard')
 
-    info_messages = []
     if request.method == 'GET':
         form = InformationForm()
         if last:
@@ -227,9 +256,9 @@ def modify_information(request, last):
             form = InformationForm(instance=match, data=request.POST)
         if form.is_valid():
             form.save()
-            info_messages.append("Obvestilo je shranjeno.")
+            messages.success(request, "Obvestilo je shranjeno.")
 
-    return render(request, "modify-information.html", {"form": form, "info_messages": info_messages, "last":last})
+    return render(request, "modify-information.html", {"form": form, "last":last})
 
 
 # TODO: remove

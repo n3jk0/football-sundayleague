@@ -55,9 +55,7 @@ def save_rounds(fixtures_text=""):
     prev_round = -1
     current_league = 1
     team_names = [team.name for team in Team.objects.all()]
-    print(len(rounds_blocks))
     for i, block in enumerate(rounds_blocks):
-        print(block)
         lines = block.split("\n")
         round_number = int(re.findall("[0-9]+", lines[0])[0])
         if round_number < prev_round:
@@ -123,3 +121,11 @@ def save_fixtures():
     print("{} ekip je bilo shranjenih.".format(len(saved_teams)))
     save_rounds(fixtures_text)
     save_matches(fixtures_text)
+
+def save_fixtures_for_file(file_id=-1):
+    fixtures_text = get_fixtures_text_by_id(file_id)
+    saved_teams = save_teams(fixtures_text)
+    print("{} ekip je bilo shranjenih.".format(len(saved_teams)))
+    save_rounds(fixtures_text)
+    save_matches(fixtures_text)
+    return True

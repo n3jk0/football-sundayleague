@@ -73,6 +73,7 @@ def save_result_from_text(results_text):
                     result[1] = result[1].split('(b.b.)')[0]
                 match.second_team_score = result[1]
                 saved_results.append(match)
+                match.status = Match.MatchStatus.CONFIRMED
                 match.save()
         league_num += 1
     return saved_results

@@ -1,20 +1,27 @@
 {% extends 'base/base-with-header.html' %}
 {% load widget_tweaks %}
 
-{% block title %} Uvozi rezultate {% endblock %}
+{% block title %} Uvozi {% if fixtures_upload %}razpored{% else %}rezultate{% endif %} {% endblock %}
 
 {% block content %}
     <div class="shadow rounded p-3 bg-light w-50">
+        {% if fixtures_upload %}
+            <a class="text-dark nounderline" href="{% url 'sunday_league:upload_results' %}">Dodaj rezultate</a>
+        {% else %}
+            <a class="text-dark nounderline" href="{% url 'sunday_league:upload_fixtures' %}">Dodaj razpored</a>
+        {% endif %}
+
+        <hr/>
         <form class="d-flex flex-column match-form" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="w-100">
-                <h2>Uvozi rezultate</h2>
+                <h2>Uvozi {% if fixtures_upload %}razpored{% else %}rezultate{% endif %}</h2>
                 {% include 'components/messages.html' %}
 
                 <i class="text-secondary">Datotek mora biti v .docx formatu.</i>
                 <div class="custom-file">
                     {% render_field form.file_content class="custom-file-input" id="resultsFile" accept=".docx" %}
-                    <label class="p-2 custom-file-label" for="resultsFile">Uvozi rezultate</label>
+                    <label class="p-2 custom-file-label" for="resultsFile">Uvozi {% if fixtures_upload %}razpored{% else %}rezultate{% endif %}</label>
                 </div>
 
             </div>

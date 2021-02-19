@@ -2,7 +2,8 @@
     {% if request.user.is_authenticated %}
         <form class="d-flex justify-content-end" action="{% url 'sunday_league:logout' %}" method="post">
             {% csrf_token %}
-            <button type="submit" class="btn btn-link text-white-50 pt-2 pr-3">Izpis</button>
+            <b class="text-white" style="padding-top: 6px">{{ request.user.username }},</b>
+            <button id='logout_button' type="submit" class="btn btn-link text-white-50">Izpis</button>
         </form>
     {% else %}
         <div class="d-flex justify-content-end">

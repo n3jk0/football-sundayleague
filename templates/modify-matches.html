@@ -28,8 +28,8 @@
                                 {% render_field form.first_team_score id=first_team_score_id %}
                                 <label class="col form-label" for="{{ second_team_score_id }}">{{ form.instance.second_team }}</label>
                                 {% render_field form.second_team_score id=second_team_score_id %}
-                                <button class="btn btn-sm btn-dark ml-5 col-auto" type="submit" value="Shrani">Shrani
-                                </button>
+                                {# TODO: flag for suspended match #}
+                                <button class="btn btn-sm btn-dark ml-5 col-auto" type="submit" value="Shrani">Shrani</button>
                             </div>
                         </form>
                     {% endwith %}

@@ -1,0 +1,6 @@
+# Copy to python console to add new user
+
+from django.contrib.auth.models import User
+
+user = User.objects.create_user('name', password='password')
+user.save()

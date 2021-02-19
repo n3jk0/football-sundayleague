@@ -115,6 +115,12 @@
             {% endfor %}
         </div>
     {% endfor %}
+
+    {% if not rounds %}
+        <div class="shadow p-3 mb-5 bg-light rounded">
+            V sistemu še ni uvoženih tekem
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block standing %}
