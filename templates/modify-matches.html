@@ -20,22 +20,55 @@
                     {% with first_team_score_id="first_team_score_"|add:form_id second_team_score_id="second_team_score_"|add:form_id %}
                         <form id="match-{{ form_id }}" class="d-flex match-form" method="post">
                             {% csrf_token %}
-                            <div class="row pl-2 w-100">
-                                <input type="hidden" name="match_id" value="{{ form_id }}">
-                                <div class="col-sm-auto">
-                                    {% render_field form.status class='custom-select' %}
+                            <div class="content w-100">
+                                <div class="row pl-2 w-100 match-result">
+                                    <input type="hidden" name="match_id" value="{{ form_id }}">
+                                    <div class="col-sm-auto">
+                                        {% render_field form.status class='custom-select' %}
+                                    </div>
+                                    <label class="col form-label"
+                                           for="{{ first_team_score_id }}">{{ form.instance.first_team }}</label>
+                                    {% render_field form.first_team_score id=first_team_score_id %}
+                                    <label class="col form-label"
+                                           for="{{ second_team_score_id }}">{{ form.instance.second_team }}</label>
+                                    {% render_field form.second_team_score id=second_team_score_id %}
+                                    {# TODO: flag for suspended match #}
+                                    <button class="btn btn-sm btn-dark ml-5 col-auto" type="submit" value="Shrani">
+                                        Shrani
+                                    </button>
                                 </div>
-                                <label class="col form-label"
-                                       for="{{ first_team_score_id }}">{{ form.instance.first_team }}</label>
-                                {% render_field form.first_team_score id=first_team_score_id %}
-                                <label class="col form-label"
-                                       for="{{ second_team_score_id }}">{{ form.instance.second_team }}</label>
-                                {% render_field form.second_team_score id=second_team_score_id %}
-                                {# TODO: flag for suspended match #}
-                                <button class="btn btn-sm btn-dark ml-5 col-auto" type="submit" value="Shrani"
-                                        {% if not profile.is_admin and form.instance|saving_disabled %}
-                                        disabled {% endif %}>Shrani
-                                </button>
+                                <div class="d-flex pl-4 pt-2 row w-100">
+                                    <a class="badge badge-light" data-toggle="collapse" role="button"
+                                       href="#collapseExample{{ form_id }}" aria-expanded="false"
+                                       aria-controls="collapseExample{{ form_id }}">
+                                        Vpiši strelce
+                                    </a>
+                                </div>
+                                <div class="collapse pl-3 pt-2 w-100" id="collapseExample{{ form_id }}">
+                                    <div class="row">
+                                        <div class="col">
+                                            <i>Strelci: {{ form.instance.first_team }}</i>
+                                        </div>
+                                        <div class="col">
+                                            <i>Strelci: {{ form.instance.second_team }}</i>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <input class="pl-2 w-100 h-100" type="text" placeholder="Ime priimek">
+                                        </div>
+                                        <div class="col-auto pl-0">
+                                            <button type="button" class="btn btn-outline-dark">+</button>
+                                        </div>
+                                        <hr/>
+                                        <div class="col">
+                                            <input class="pl-2  w-100 h-100" type="text" placeholder="Ime priimek">
+                                        </div>
+                                        <div class="col-auto pl-0">
+                                            <button type="button" class="btn btn-outline-dark">+</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     {% endwith %}
