@@ -29,17 +29,7 @@ def get_results_text_by_id(file_id):
     return file.text_content if bool(file.text_content) else read_file(file)
 
 
-def save_results():
-    results_text = get_results_text()
-    saved_results = []
-    while results_text:
-        saved_results.append(save_result_from_text(results_text))
-        save_information(results_text)
-        results_text = get_results_text()
-    return saved_results
-
-
-def save_result_from_text(results_text):
+def get_result_from_text(results_text):
     league_indexes = [m.start() for m in re.finditer('TRAVNA LIGA', results_text)]
     team_names = [team.name for team in Team.objects.all()]
     league_num = 1
@@ -59,7 +49,7 @@ def save_result_from_text(results_text):
             # find number in first line
             round_num = int(re.findall('[0-9]+', round_block.split("\n")[0])[0])
             r = Round.objects.get(round_number=round_num, league_number=league_num)
-            results_for_round = re.findall("[0-9A-Z -.]+\n:\n[0-9A-Z -.]+\n[0-9]+:[0-9]+[(b.b.)]*", round_block)
+            results_for_round = re.findall("[0-9A-Ž -.]+\n:\n[0-9A-Ž -.]+\n[0-9]+:[0-9]+[(b.b.)]*", round_block)
             for result_per_round in results_for_round:
                 lines = result_per_round.split("\n")
                 matches_in_round = Match.objects.filter(round=r)
@@ -74,17 +64,27 @@ def save_result_from_text(results_text):
                 match.second_team_score = result[1]
                 saved_results.append(match)
                 match.status = Match.MatchStatus.CONFIRMED
-                match.save()
         league_num += 1
     return saved_results
 
 
-def save_results_for_file(file_id):
+def preview_results_for_file(file_id):
     results_text = get_results_text_by_id(file_id)
     if not results_text:
         return []
     save_information(results_text)
-    return save_result_from_text(results_text)
+    matches = get_result_from_text(results_text)
+    return matches
+
+
+def save_results_for_file(file_id):
+    matches = preview_results_for_file(file_id)
+    [match.save() for match in matches]
+    return matches
+
+
+def save_results(matches):
+    [match.save() for match in matches]
 
 
 def update_table():

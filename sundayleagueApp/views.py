@@ -182,28 +182,44 @@ def modify_matches(request, round_id=-1):
 
 @require_http_methods(["GET", "POST"])
 @login_required(login_url="/login/")
-def upload_results(request):
+def upload_results(request, file_uuid=None):
     profile = request.user.profile
     if not profile.is_admin:
         return redirect('sunday_league:dashboard')
 
     if request.method == 'GET':
         form = FileForm()
+        if file_uuid:
+            form.instance = File.objects.get(uuid=file_uuid)
     elif request.method == 'POST':
+        # Preview confirmed
+        if 'file_id' in request.POST and request.POST.get('file_id'):
+            file_id = request.POST.get('file_id')
+            saved_matches = ResultsService.save_results_for_file(file_id)
+            if not saved_matches:
+                messages.warning(request, "Datoteka z id-jem {} ne obstaja!".format(file_id))
+            else:
+                messages.success(request, "{} rezultatov je bilo vnesenih.".format(len(saved_matches)))
+                ResultsService.update_table()
+                messages.success(request, "Lestvica je bila posodobljena.")
+            return redirect('sunday_league:upload_results')
+
+        # Genereate preview
         form = FileForm(request.POST, request.FILES)
         if form.is_valid():
             file = form.save()
             file_id = file.id
-            saved_results = ResultsService.save_results_for_file(file_id)
+            saved_results = ResultsService.preview_results_for_file(file_id)
             if not saved_results:
                 messages.warning(request, "Datoteka z id-jem {} ne obstaja!".format(file_id))
-            else:
-                messages.success(request, "{} rezultatov je bilo vnesenih.".format(len(saved_results)))
-                ResultsService.update_table()
-                messages.success(request, "Lestvica je bila posodobljena.")
-            return redirect('sunday_league:upload_results')
+
+            results_by_round = {}
+            for result in saved_results:
+                results_by_round.setdefault(result.round, []).append(result)
+            # TODO: Delete file if cancel preview
+            return render(request, 'upload-file.html', {"fixtures_upload": False, 'preview_matches': results_by_round, 'file_id': file_id})
         else:
-            warn_messages.append("Prišlo je do napake.")
+            messages.warning(request, "Prišlo je do napake.")
 
     return render(request, 'upload-file.html', {'form': form, "fixtures_upload": False})
 
@@ -232,7 +248,7 @@ def upload_fixtures(request):
                 messages.success(request, "Razpored je bil dodan.")
             return redirect('sunday_league:upload_fixtures')
         else:
-            warn_messages.append("Prišlo je do napake.")
+            messages.warning(request, "Prišlo je do napake.")
 
     return render(request, 'upload-file.html', {'form': form, "fixtures_upload": True})
 

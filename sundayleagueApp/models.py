@@ -36,7 +36,7 @@ class Team(models.Model):
 # Basiclly user with additional fields
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, blank=False)
-    team = models.OneToOneField(Team, on_delete=models.SET_NULL, null=True)
+    team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
     is_admin = models.BooleanField(default=False)
 
     @receiver(post_save, sender=User)
