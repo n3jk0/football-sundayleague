@@ -155,12 +155,13 @@ def dashboard(request):
 @login_required(login_url="/login/")
 def modify_matches(request, round_id=-1):
     round_id = int(round_id)
+    profile = request.user.profile
     if round_id >= 0:
         if request.method == 'POST':
             if 'match_id' in request.POST:
                 match_id = request.POST.get('match_id')
                 match = Match.objects.get(id=match_id)
-                form = MatchForm(instance=match, data=request.POST)
+                form = MatchForm(profile, instance=match, data=request.POST)
             if form.is_valid():
                 form.save()
                 ResultsService.update_table()
@@ -168,7 +169,6 @@ def modify_matches(request, round_id=-1):
                 return redirect('sunday_league:matches_by_round', round_id=round_id)
         try:
             selected_round = Round.objects.get(id=round_id)
-            profile = request.user.profile
             if not profile.is_admin and selected_round.home_team != profile.team:
                 print('User:', profile.user, "doesn't have privileges for round", selected_round)
                 return redirect('dashboard')
@@ -176,8 +176,8 @@ def modify_matches(request, round_id=-1):
             print('Round with id', round_id, "doesn't exists")
             return redirect('dashboard')
         matches_for_round = Match.objects.filter(round=selected_round).order_by('time').all()
-        forms = [MatchForm(instance=m) for m in matches_for_round]
-        return render(request, 'modify-matches.html', {'selected_round': selected_round, 'matches': matches_for_round, 'forms': forms})
+        forms = [MatchForm(profile, disabled=(not profile.is_admin and saving_disabled(m)), instance=m)for m in matches_for_round]
+        return render(request, 'modify-matches.html', {'profile':profile, 'selected_round': selected_round, 'matches': matches_for_round, 'forms': forms})
 
 
 @require_http_methods(["GET", "POST"])
@@ -374,3 +374,9 @@ def status_class(match):
         return 'endMatch'
     else:
         return 'confirmedMatch'
+
+
+@register.filter
+def saving_disabled(match):
+    return match.status == match.MatchStatus.CONFIRMED
+
