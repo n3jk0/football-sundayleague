@@ -35,7 +35,7 @@ def get_fixtures_text_by_id(file_id):
 def save_teams(fixtures_text=""):
     if not fixtures_text:
         fixtures_text = get_fixtures_text()
-    teams = re.findall('[0-9]+[\.][\n][0-9]*[A-Z -]+[0-9]*', fixtures_text)
+    teams = re.findall('[0-9]+[\.][\n][0-9]*[A-Ž -]+[0-9]*', fixtures_text)
     saved_teams = [Team.objects.get_or_create(name=team.split("\n")[1]) for team in teams]
     return saved_teams
 
@@ -73,7 +73,7 @@ def save_rounds(fixtures_text=""):
 def save_matches(fixtures_text=""):
     if not fixtures_text:
         fixtures_text = get_fixtures_text()
-    matches_blocks = re.findall("[0-9A-Z -.]*[\n]:[\n][0-9A-Z -.]*[\n]:", fixtures_text)
+    matches_blocks = re.findall("[0-9A-Ž -.]*[\n]:[\n][0-9A-Ž -.]*[\n]:", fixtures_text)
     prev_index = fixtures_text.index(matches_blocks[0])
     round_num = 1
     time_id = 0

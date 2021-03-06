@@ -4,7 +4,7 @@
 {% block title %} Uvozi {% if fixtures_upload %}razpored{% else %}rezultate{% endif %} {% endblock %}
 
 {% block content %}
-    <div class="shadow rounded p-3 bg-light w-50">
+    <div class="shadow rounded p-3 bg-light w-50" style="z-index: 10">
         {% if fixtures_upload %}
             <a class="text-dark nounderline" href="{% url 'sunday_league:upload_results' %}">Dodaj rezultate</a>
         {% else %}
@@ -14,23 +14,45 @@
         <hr/>
         <form class="d-flex flex-column match-form" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="w-100">
-                <h2>Uvozi {% if fixtures_upload %}razpored{% else %}rezultate{% endif %}</h2>
-                {% include 'components/messages.html' %}
+            {% include 'components/messages.html' %}
+            {% if not preview_matches %}
+                <div class="w-100">
+                    <h2>Uvozi {% if fixtures_upload %}razpored{% else %}rezultate{% endif %}</h2>
+                    <i class="text-secondary">Datotek mora biti v .docx formatu.</i>
+                    <div class="custom-file">
+                        {% render_field form.file_content class="custom-file-input" id="resultsFile" accept=".docx" %}
+                        <label class="p-2 custom-file-label" for="resultsFile">Uvozi {% if fixtures_upload %}
+                            razpored{% else %}rezultate{% endif %}</label>
+                    </div>
 
-                <i class="text-secondary">Datotek mora biti v .docx formatu.</i>
-                <div class="custom-file">
-                    {% render_field form.file_content class="custom-file-input" id="resultsFile" accept=".docx" %}
-                    <label class="p-2 custom-file-label" for="resultsFile">Uvozi {% if fixtures_upload %}razpored{% else %}rezultate{% endif %}</label>
                 </div>
-
-            </div>
-            <br/>
-            <div class="d-flex justify-content-end">
-                <button class="btn btn-dark" type="submit" value="Shrani">Uvozi</button>
-            </div>
+                <br/>
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-dark" type="submit" value="Shrani">Uvozi</button>
+                </div>
+            {% else %}
+                <div class="d-flex flex-column">
+                    <input type="hidden" name="file_id" value="{{ file_id }}">
+                    <h3>Predogled:</h3>
+                    <br/>
+                    {% for round, match_list in preview_matches.items %}
+                        <b>Liga {{ round.league_number }}: KROG {{ round.round_number }}</b>
+                        {% for match in match_list %}
+                            {{ match }}
+                            <br/>
+                        {% endfor %}
+                        <br/>
+                    {% endfor %}
+                </div>
+                <div class="d-flex justify-content-end">
+                    <a class="btn btn-outline-dark mr-2" type="submit" href="{% url 'sunday_league:upload_results' %}">Prekliči</a>
+                    <button class="btn btn-dark" type="submit">Potrdi</button>
+                </div>
+            {% endif %}
         </form>
-        <a class="text-dark nounderline p-2" href="{% url 'sunday_league:dashboard' %}"><b>Nazaj</b></a>
+        {% if not preview_matches %}
+            <a class="text-dark nounderline p-2" href="{% url 'sunday_league:dashboard' %}"><b>Nazaj</b></a>
+        {% endif %}
     </div>
     <script>
         // Add the following code if you want the name of the file appear on select

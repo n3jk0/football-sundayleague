@@ -18,8 +18,5 @@ def read_file(file):
 
 def preprocess(text):
     text = re.sub(r'[\n\t]+', '\n', text)
-    text = re.sub(r'Š', 'S', text)
-    text = re.sub(r'Ž', 'Z', text)
-    text = re.sub(r'Č', 'C', text)
     text = re.sub(r'–', '-', text)
     return text
