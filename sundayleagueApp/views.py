@@ -147,8 +147,11 @@ def dashboard(request):
     profile = request.user.profile
     user_team = profile.team
     editable_rounds = Round.objects.all() if profile.is_admin else Round.objects.filter(home_team=user_team).all()
+    rounds_by_league = {}
+    for round in editable_rounds:
+        rounds_by_league.setdefault(round.league_number, []).append(round)
     completed_rounds = dict(zip(editable_rounds, [r.all_match_completed() for r in editable_rounds]))
-    return render(request, 'dashboard.html', {'profile':profile, 'rounds': editable_rounds, 'completed_rounds': completed_rounds})
+    return render(request, 'dashboard.html', {'profile':profile, 'rounds': rounds_by_league, 'completed_rounds': completed_rounds})
 
 
 @require_http_methods(["GET", "POST"])
