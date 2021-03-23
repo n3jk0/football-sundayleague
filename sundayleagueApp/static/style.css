@@ -111,6 +111,6 @@ footer {
     margin-left: .25em;
 }
 
-.table-nonfluid {
-    width: auto !important;
+#header hr {
+    margin-top: 0px;
 }

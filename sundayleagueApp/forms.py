@@ -1,20 +1,33 @@
 from django import forms
+from .custom_widgets import DataListWidget
 from . import models
 from .fields import GroupedModelChoiceField
 
 
 class MatchForm(forms.ModelForm):
+    first_team_scorers=forms.CharField(max_length=200)
+    second_team_scorers=forms.CharField(max_length=200)
+
     class Meta:
         model = models.Match
         fields = {'status', 'first_team_score', 'second_team_score'}
 
     def __init__(self, profile, disabled=False, *args, **kwargs):
         super(MatchForm, self).__init__(*args, **kwargs)
+        first_team_scorers_list = map((lambda player: player.name()), models.Player.objects.filter(team=self.instance.first_team).all())
+        second_team_scorers_list = map((lambda player: player.name()), models.Player.objects.filter(team=self.instance.second_team).all())
+        self.fields['first_team_scorers'].widget = DataListWidget(data_list=first_team_scorers_list, name='first_team_scorers')
+        self.fields['second_team_scorers'].widget = DataListWidget(data_list=second_team_scorers_list, name='second_team_scorers')
         if disabled:
             for field in self.fields.values():
                 field.widget.attrs['disabled'] = True
         elif not profile.is_admin:
             self.fields['status'].choices = [(models.Match.MatchStatus.LIVE.name, models.Match.MatchStatus.LIVE.label), (models.Match.MatchStatus.COMPLETED.name, models.Match.MatchStatus.COMPLETED.label)]
+
+    def save(self, commit=True):
+        # TODO: first_team_scorers and second_team_scorers
+        # self.cleaned_data['first_team_scorers']
+        return super(MatchForm, self).save(commit=commit)
 
 
 class FileForm(forms.ModelForm):

@@ -150,3 +150,11 @@ class Information(models.Model):
     def __str__(self):
         sub = self.info[:50]
         return sub if len(sub) == len(self.info) else "{}...".format(sub)
+
+
+class SystemSetting(models.Model):
+    key = models.CharField(max_length=255)
+    string_value = models.CharField(max_length=255)
+
+    def __str__(self):
+        return "{} - {}".format(self.key, self.string_value)

@@ -69,6 +69,7 @@ site = MyAdminSite(name='admin')
 site.register(User)
 site.register(Group)
 site.register(Profile)
+site.register(SystemSetting)
 
 site.register(Round)
 site.register(Team)

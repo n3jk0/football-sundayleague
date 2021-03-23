@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from sundayleagueApp.models import *
 from sundayleagueApp.forms import *
+from sundayleagueApp.services import SystemSettingsUtils
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import *
@@ -14,6 +15,7 @@ from django.contrib.auth.decorators import login_required
 
 import services.FixturesService as FixturesServices
 import services.ResultsService as ResultsService
+import constants
 from django.shortcuts import redirect
 
 import datetime
@@ -181,7 +183,14 @@ def modify_matches(request, round_id=-1):
             return redirect('dashboard')
         matches_for_round = Match.objects.filter(round=selected_round).order_by('time').all()
         forms = [MatchForm(profile, disabled=(not profile.is_admin and saving_disabled(m)), instance=m)for m in matches_for_round]
-        return render(request, 'modify-matches.html', {'profile':profile, 'selected_round': selected_round, 'matches': matches_for_round, 'forms': forms})
+        # goals_by_match = {}
+        # for matchGoal in MatchGoals.objects.all():
+        #     goals_by_match.setdefault(matchGoal.match, []).append(matchGoal)
+
+        return render(request, 'modify-matches.html',
+                      {'profile': profile, 'selected_round': selected_round, 'matches': matches_for_round,
+                       'write_scorers_enabled': SystemSettingsUtils.get_bool_value(constants.WRITE_SCORERS_ENABLED),
+                       'forms': forms})
 
 
 @require_http_methods(["GET", "POST"])
