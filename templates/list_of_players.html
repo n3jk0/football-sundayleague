@@ -1,0 +1,31 @@
+{% extends 'base/base-with-header.html' %}
+{% load widget_tweaks %}
+
+{% block title %} Seznam igralcev {% endblock %}
+
+{% block content %}
+    <div class="shadow rounded p-3 bg-light w-50">
+        <h3 class="text-center"><b>Strelci</b></h3>
+        <form method="post">
+            {% csrf_token %}
+            {% for league in '1234'|make_list %}
+                <div class="separator">Liga {{ league }}</div>
+                {% for player in players_by_league|get_item:league %}
+                    <div class="row p-1 w-100">
+                        <div class="col pt-2">{{ player }}</div>
+                        <div class="col-auto d-flex justify-content-end">
+                            <input name="player_{{ player.id }}" type="number" class="form-control w-50" min="0" value="{{ player.goals }}"/>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-dark" type="submit" value="Shrani">Shrani</button>
+            </div>
+        </form>
+        <div class="d-flex flex-column">
+            <a class="text-dark nounderline p-2" href="{% url 'sunday_league:player' %}"><b>Dodaj igralca</b></a>
+            <a class="text-dark nounderline p-2" href="{% url 'sunday_league:dashboard' %}"><b>Nazaj</b></a>
+        </div>
+    </div>
+{% endblock %}

@@ -280,6 +280,53 @@ def modify_information(request, last):
     return render(request, "modify-information.html", {"form": form, "last":last})
 
 
+@require_http_methods(["GET", "POST"])
+@login_required(login_url="/login/")
+def player(request, player_id=-1):
+    profile = request.user.profile
+    if not profile.is_admin:
+        return redirect('sunday_league:dashboard')
+
+    if request.method == 'GET':
+        form = PlayerForm()
+        if int(player_id) > 0:
+            form = PlayerForm(instance=Player.objects.get(id=player_id))
+
+    elif request.method == 'POST':
+        form = PlayerForm(data=request.POST)
+        if int(player_id) > 0:
+            player = Player.objects.get(id=player_id)
+            form = PlayerForm(instance=player, data=request.POST)
+        if form.is_valid():
+            player = form.save()
+            messages.success(request, "Igralec je shranjen.")
+            return redirect('sunday_league:player', player_id=player.id)
+
+    return render(request, "player.html", {"form": form})
+
+
+@require_http_methods(["GET", "POST"])
+@login_required(login_url="/login/")
+def players(request):
+    profile = request.user.profile
+    if not profile.is_admin:
+        return redirect('sunday_league:dashboard')
+
+    players_by_league = {}
+    for player in Player.objects.order_by('-goals').all():
+        # Use string for league due to django template restriction
+        players_by_league.setdefault(str(player.team.league), []).append(player)
+
+    if request.method == 'POST':
+        for player in Player.objects.all():
+            player_input_id = "player_" + str(player.id)
+            player.goals = request.POST[player_input_id]
+            player.save()
+        return redirect('sunday_league:players')
+
+    return render(request, "list_of_players.html", {"players_by_league": players_by_league})
+
+
 # TODO: remove
 # DEPRECATED: Method called from django admin
 @csrf_exempt

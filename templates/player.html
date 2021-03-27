@@ -1,0 +1,27 @@
+{% extends 'base/base-with-header.html' %}
+{% load widget_tweaks %}
+
+{% block title %} Dodaj igralca {% endblock %}
+
+{% block content %}
+    <div class="shadow rounded p-3 bg-light w-50">
+        {% include 'components/messages.html' %}
+        <form class="d-flex flex-column" method="post">
+            <h3>Uredi igralca</h3>
+            {% csrf_token %}
+
+            <label class="mb-0" for="player_team">Ekipa</label>
+            {% render_field form.team id='player_team' class='form-control mb-2' %}
+            <label class="mb-0" for="player_first_name">Ime</label>
+            {% render_field form.first_name id='player_first_name' class='form-control mb-2' %}
+            <label class="mb-0" for="player_family_name">Priimek</label>
+            {% render_field form.family_name id='player_family_name' class='form-control mb-2' %}
+            <label class="mb-0" for="player_goals">Število golov</label>
+            {% render_field form.goals id='player_goals' class='form-control mb-2' min=0 %}
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-dark" type="submit" value="Shrani">Shrani</button>
+            </div>
+        </form>
+        <a class="text-dark nounderline p-2" href="{% url 'sunday_league:players' %}"><b>Nazaj</b></a>
+    </div>
+{% endblock %}

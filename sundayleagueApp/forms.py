@@ -1,5 +1,6 @@
 from django import forms
 from . import models
+from fields import GroupedModelChoiceField
 
 
 class MatchForm(forms.ModelForm):
@@ -26,3 +27,11 @@ class InformationForm(forms.ModelForm):
     class Meta:
         model = models.Information
         fields = {'info'}
+
+
+class PlayerForm(forms.ModelForm):
+    team = GroupedModelChoiceField(queryset=models.Team.objects.order_by('league', 'name').all(), choices_groupby='league', groupby_prefix="Liga ")
+
+    class Meta:
+        model = models.Player
+        fields = {'team', 'first_name', 'family_name', 'goals'}
