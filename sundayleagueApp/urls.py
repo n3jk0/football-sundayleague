@@ -27,7 +27,10 @@ urlpatterns = [
   url(r'^uploadresults/$', views.upload_results, name='upload_results'),
   url(r'^uploadfixtures/$', views.upload_fixtures, name='upload_fixtures'),
   url(r'^modifyinformation/$', views.modify_information, {'last': False}, name='modify_information'),
-  url(r'^modifyinformation/last$', views.modify_information, {'last': True}, name='modify_last_information')
+  url(r'^modifyinformation/last$', views.modify_information, {'last': True}, name='modify_last_information'),
+  url(r'^player/(?P<player_id>\d)+/$', views.player, name='player'),
+  url(r'^player/$', views.player, name='player'),
+  url(r'^players/$', views.players, name='players')
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # urlpatterns += staticfiles_urlpatterns()

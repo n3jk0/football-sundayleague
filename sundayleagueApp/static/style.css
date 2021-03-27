@@ -73,6 +73,7 @@ footer {
 
 #contentDiv {
     min-width: 66%;
+    z-index: 10;
 }
 
 @media only screen and (max-width: 1024px) {
@@ -87,4 +88,25 @@ footer {
     #contentDiv {
         min-width: 75%
     }
+}
+
+.separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.separator::before,
+.separator::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #000;
+}
+
+.separator:not(:empty)::before {
+    margin-right: .25em;
+}
+
+.separator:not(:empty)::after {
+    margin-left: .25em;
 }
