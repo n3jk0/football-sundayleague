@@ -3,10 +3,12 @@
 {% block body %}
     <div class="d-flex flex-column bg">
         {% include 'components/header.html' %}
-        <div id="contentDiv" class="d-flex p-3 justify-content-center">
-            {% block content %}
+        <div class="d-flex p-3 justify-content-center">
+            <div id="contentDiv">
+                {% block content %}
 
-            {% endblock %}
+                {% endblock %}
+            </div>
         </div>
         <footer class="pr-3">
             <p class="text-muted">Author: Nejc Kozlevčar<br>
