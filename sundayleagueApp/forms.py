@@ -1,6 +1,6 @@
 from django import forms
 from . import models
-from fields import GroupedModelChoiceField
+from .fields import GroupedModelChoiceField
 
 
 class MatchForm(forms.ModelForm):
