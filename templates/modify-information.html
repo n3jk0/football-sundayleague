@@ -4,7 +4,7 @@
 {% block title %} Uredi obvestilo {% endblock %}
 
 {% block content %}
-    <div class="shadow rounded p-3 bg-light w-50">
+    <div class="shadow rounded p-3 bg-light">
         {% if last %}
             <a class="text-dark nounderline" href="{% url 'sunday_league:modify_information' %}">Dodaj novo obvestilo</a>
         {% else %}

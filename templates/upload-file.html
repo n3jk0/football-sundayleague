@@ -4,7 +4,7 @@
 {% block title %} Uvozi {% if fixtures_upload %}razpored{% else %}rezultate{% endif %} {% endblock %}
 
 {% block content %}
-    <div class="shadow rounded p-3 bg-light w-50" style="z-index: 10">
+    <div class="shadow rounded p-3 bg-light" style="z-index: 10">
         {% if fixtures_upload %}
             <a class="text-dark nounderline" href="{% url 'sunday_league:upload_results' %}">Dodaj rezultate</a>
         {% else %}
