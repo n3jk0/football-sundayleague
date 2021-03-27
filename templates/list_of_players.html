@@ -12,7 +12,7 @@
                 <div class="separator">Liga {{ league }}</div>
                 {% for player in players_by_league|get_item:league %}
                     <div class="row p-1 w-100">
-                        <div class="col pt-2">{{ player }}</div>
+                        <div class="col pt-2"><a class="nounderline text-dark" href="{% url 'sunday_league:player' player_id=player.id %}">{{ player }}</a></div>
                         <div class="col-auto d-flex justify-content-end">
                             <input name="player_{{ player.id }}" type="number" class="form-control w-50" min="0" value="{{ player.goals }}"/>
                         </div>
