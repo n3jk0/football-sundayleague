@@ -28,6 +28,20 @@ class InformationForm(forms.ModelForm):
         model = models.Information
         fields = {'info'}
 
+    def __init__(self, *args, **kwargs):
+        super(InformationForm, self).__init__(*args, **kwargs)
+        if self.instance and self.instance.id is not None:
+            replaced_info = self.instance.info.replace("<br/>", "\n")
+            self.instance.info = replaced_info
+            self.initial['info'] = replaced_info
+
+
+    def save(self, commit=True):
+        # self.cleaned_data['first_team_scorers']
+        if self.instance and self.instance.id is not None:
+            self.instance.info = self.instance.info.replace("\n", "<br/>")
+        return super(InformationForm, self).save(commit=commit)
+
 
 class PlayerForm(forms.ModelForm):
     team = GroupedModelChoiceField(queryset=models.Team.objects.order_by('league', 'name').all(), choices_groupby='league', groupby_prefix="Liga ")

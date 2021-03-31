@@ -15,6 +15,7 @@
         {% include 'components/messages.html' %}
         <form class="d-flex flex-column" method="post">
             {% csrf_token %}
+            <input type="hidden" name="information_id" value="{{ form.instance.id|stringformat:"i" }}"/>
             {% if last %}<h2>Uredi zadnje obvestilo</h2>{% else %}<h2>Spremeni obvestilo</h2>{% endif %}
             {% render_field form.info class="form-control" %}
             <br/>

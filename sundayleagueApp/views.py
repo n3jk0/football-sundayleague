@@ -267,15 +267,19 @@ def modify_information(request, last):
         form = InformationForm()
         if last:
             last_information = Information.objects.order_by("-pk").first()
+            if not last_information:
+                return redirect('sunday_league:modify_information')
             form = InformationForm(instance=last_information)
     elif request.method == 'POST':
         form = InformationForm(data=request.POST)
-        if 'information_id' in request.POST:
-            match = InformationForm.objects.get(id=request.POST.get('information_id'))
-            form = InformationForm(instance=match, data=request.POST)
+        if 'information_id' in request.POST and request.POST.get('information_id'):
+            information_id = request.POST.get('information_id')
+            information = Information.objects.get(id=information_id)
+            form = InformationForm(instance=information, data=request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, "Obvestilo je shranjeno.")
+            return redirect('sunday_league:modify_last_information')
 
     return render(request, "modify-information.html", {"form": form, "last":last})
 

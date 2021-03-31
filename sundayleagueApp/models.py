@@ -145,7 +145,7 @@ class MatchGoals(models.Model):
 
 
 class Information(models.Model):
-    info = models.TextField(max_length=2055)
+    info = models.TextField(max_length=8191)
 
     def __str__(self):
         sub = self.info[:50]
