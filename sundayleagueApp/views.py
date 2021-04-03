@@ -27,11 +27,12 @@ def index(request):
     today_minus_3 = today - datetime.timedelta(days=3)
     # NOTE: this query works only on PostgresSQL
     # Show last results or next fixture by league
-    round_to_show_by_league = Round.objects.filter(date__gt=today_minus_3).order_by('league_number', 'date').distinct(
-        'league_number').all()
-    if not round_to_show_by_league:
-        # Last round by league
-        round_to_show_by_league = Round.objects.order_by('league_number', '-date').distinct('league_number').all()
+    round_to_show_by_league = Round.objects.filter(date__gt=today_minus_3).order_by('league_number', 'date').distinct('league_number').all()
+    # Last results or next fixture wasn't found for at least one league. Get last round for that league
+    if len(round_to_show_by_league) != 4:
+        leagues_to_exclude = [r.league_number for r in round_to_show_by_league]
+        # Append last round by missing leagues
+        round_to_show_by_league |= Round.objects.exclude(league_number__in=leagues_to_exclude).order_by('league_number', '-date').distinct('league_number').all()
     rounds_group_by_league = {}
     [rounds_group_by_league.setdefault(LEAGUE_PREFIX + str(r.league_number), []).append(r) for r in
      round_to_show_by_league]
@@ -330,6 +331,30 @@ def players(request):
 
     return render(request, "list_of_players.html", {"players_by_league": players_by_league})
 
+
+@require_http_methods(["GET", "POST"])
+@login_required(login_url="/login/")
+def round(request, round_id=-1):
+    profile = request.user.profile
+    if not profile.is_admin:
+        return redirect('sunday_league:dashboard')
+
+    if request.method == 'GET':
+        form = RoundForm()
+        if int(round_id) > 0:
+            form = RoundForm(instance=Round.objects.get(id=round_id))
+
+    elif request.method == 'POST':
+        form = RoundForm(data=request.POST)
+        if int(round_id) > 0:
+            round = Round.objects.get(id=round_id)
+            form = RoundForm(instance=round, data=request.POST)
+        if form.is_valid():
+            round = form.save()
+            messages.success(request, "Krog je shranjen.")
+            return redirect('sunday_league:round', round_id=round.id)
+
+    return render(request, "round.html", {"form": form})
 
 # TODO: remove
 # DEPRECATED: Method called from django admin

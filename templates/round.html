@@ -1,0 +1,37 @@
+{% extends 'base/base-with-header.html' %}
+{% load widget_tweaks %}
+
+{% block title %} Uredi krog {% endblock %}
+
+{% block content %}
+    <div class="shadow rounded p-3 bg-light">
+        {% include 'components/messages.html' %}
+        <form class="d-flex flex-column" method="post">
+            <h3>Uredi podatke kroga</h3>
+            {% csrf_token %}
+
+            <label class="mb-0" for="league_number">Liga</label>
+            {% render_field form.league_number id='league_number' class='form-control mb-2' %}
+            <label class="mb-0" for="round_number">Številka kroga</label>
+            {% render_field form.round_number id='round_number' class='form-control mb-2' %}
+            <label class="mb-0" for="place">Igrišče</label>
+            {% render_field form.place id='place' class='form-control mb-2' %}
+            <label class="mb-0" for="date">Datum</label>
+            {% render_field form.date id='date' class='form-control mb-2' %}
+            <label class="mb-0" for="home_team">Domačin</label>
+            {% render_field form.home_team id='home_team' class='form-control mb-2' %}
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-dark" type="submit" value="Shrani">Shrani</button>
+            </div>
+        </form>
+        <a class="text-dark nounderline p-2" href="{% url 'sunday_league:matches_by_round' round_id=form.instance.id %}"><b>Nazaj</b></a>
+    </div>
+
+    <script>
+        $(function () {
+            $("#date").datepicker({
+                format:'dd.mm.yyyy',
+            });
+        });
+    </script>
+{% endblock %}
