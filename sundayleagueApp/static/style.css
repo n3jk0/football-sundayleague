@@ -110,3 +110,7 @@ footer {
 .separator:not(:empty)::after {
     margin-left: .25em;
 }
+
+.table-nonfluid {
+    width: auto !important;
+}

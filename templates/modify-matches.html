@@ -9,7 +9,8 @@
         <div class="shadow rounded p-3 bg-light">
             <h5><b>LIGA: {{ selected_round.league_number }}</b> <br/>
                 <i><b>Krog. {{ selected_round.round_number }}</b></i>: {{ selected_round.place }} <br/>
-                Domačin: {{ selected_round.home_team }}</h5>
+                Domačin: {{ selected_round.home_team }} <br/>
+                Datum: <i>{{ selected_round.date|date:'d.m.Y' }}</i></h5>
             <hr/>
 
             {% include 'components/messages.html' %}
@@ -41,6 +42,11 @@
                 {% endwith %}
                 <hr/>
             {% endfor %}
+            {% if profile.is_admin %}
+                {# TODO: url #}
+                <a class="text-dark nounderline p-2" href="{% url 'sunday_league:round' round_id=selected_round.id %}"><b>Uredi podatke kroga</b></a>
+                <br/>
+            {% endif %}
             <a class="text-dark nounderline p-2" href="{% url 'sunday_league:dashboard' %}"><b>Nazaj</b></a>
         </div>
     </div>

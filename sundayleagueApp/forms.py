@@ -49,3 +49,12 @@ class PlayerForm(forms.ModelForm):
     class Meta:
         model = models.Player
         fields = {'team', 'first_name', 'family_name', 'goals'}
+
+
+class RoundForm(forms.ModelForm):
+    home_team = GroupedModelChoiceField(queryset=models.Team.objects.order_by('league', 'name').all(), choices_groupby='league', groupby_prefix="Liga ")
+    date = forms.DateField(input_formats=['%d.%m.%Y'], widget=forms.DateInput(format='%d.%m.%Y'))
+
+    class Meta:
+        model = models.Round
+        fields = '__all__'

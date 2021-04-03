@@ -31,12 +31,15 @@ def get_results_text_by_id(file_id):
 
 def get_result_from_text(results_text):
     league_indexes = [m.start() for m in re.finditer('TRAVNA LIGA', results_text)]
+    information_index = [m.start() for m in re.finditer('Obvestila', results_text)]
     team_names = [team.name for team in Team.objects.all()]
     league_num = 1
     saved_results = []
     for i in range(len(league_indexes)):
         if i + 1 >= len(league_indexes):
             league_block = results_text[league_indexes[i]:]
+            if len(information_index) > 0:
+                league_block = results_text[league_indexes[i]:league_indexes[0]]
         else:
             league_block = results_text[league_indexes[i]:league_indexes[i + 1]]
 
@@ -216,7 +219,7 @@ def replace_with_html_table(info_text, table):
     html_table = generate_html_table(table)
     return info_text.replace(table, html_table)
 
-
+# Generate table with 3 rows
 def generate_html_table(table):
     html_table = '<!-- Prikaz tabele -->'
     html_table += '<table class="table table-sm table-bordered">'
@@ -227,11 +230,12 @@ def generate_html_table(table):
             html_table += '<thead><tr>'
         if i < 6:
             if i % 2 == 0:
+                html_table += '<th class="text-center">'
                 line = line + ':' if not line.endswith(':') else line
                 line += ' '
-                html_table += '<th>'
                 html_table += line
             else:
+                html_table += '\n'
                 html_table += line
                 html_table += '</th>'
             continue
@@ -243,18 +247,18 @@ def generate_html_table(table):
             html_table += '<tbody>'
         if i > 5:
             # Build 1 row from 4 lines
-            if (i - 6) % 4 == 0:
+            cell_num = (i - 6) % 4
+            if cell_num == 0:
                 html_table += '<tr>'
-            if (i - 6) % 4 == 3:
+            if cell_num == 3:
                 html_table += '</tr>'
                 continue
 
-            # One cell
-            # TODO: Some better solution for if atleast
-            if line == ':':
+            # Cell by cell
+            if cell_num == 0 or cell_num == 2:
+                html_table += '<td class="text-center" style="width: 40%;">'
+            elif cell_num == 1:
                 html_table += '<td class="text-center">'
-            else:
-                html_table += '<td>'
             html_table += line
             html_table += '</td>'
     html_table += '</tbody></table>'

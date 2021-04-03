@@ -30,6 +30,8 @@ urlpatterns = [
   url(r'^modifyinformation/last$', views.modify_information, {'last': True}, name='modify_last_information'),
   url(r'^player/(?P<player_id>\d+)/$', views.player, name='player'),
   url(r'^player/$', views.player, name='player'),
+  url(r'^round/(?P<round_id>\d+)/$', views.round, name='round'),
+  url(r'^round/$', views.round, name='round'),
   url(r'^players/$', views.players, name='players')
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
