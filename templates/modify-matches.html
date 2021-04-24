@@ -20,22 +20,71 @@
                     {% with first_team_score_id="first_team_score_"|add:form_id second_team_score_id="second_team_score_"|add:form_id %}
                         <form id="match-{{ form_id }}" class="d-flex match-form" method="post">
                             {% csrf_token %}
-                            <div class="row pl-2 w-100">
-                                <input type="hidden" name="match_id" value="{{ form_id }}">
-                                <div class="col-sm-auto">
-                                    {% render_field form.status class='custom-select' %}
+                            {% render_field form.first_team_scorers_count_field %}
+                            {% render_field form.second_team_scorers_count_field %}
+                            <div class="content w-100">
+                                <div class="row pl-2 w-100 match-result">
+                                    <input type="hidden" name="match_id" value="{{ form_id }}">
+                                    <div class="col-sm-auto">
+                                        {% render_field form.status class='custom-select' %}
+                                    </div>
+                                    <label class="col form-label"
+                                           for="{{ first_team_score_id }}">{{ form.instance.first_team }}</label>
+                                    {% render_field form.first_team_score id=first_team_score_id %}
+                                    <label class="col form-label"
+                                           for="{{ second_team_score_id }}">{{ form.instance.second_team }}</label>
+                                    {% render_field form.second_team_score id=second_team_score_id %}
+                                    {# TODO: flag for suspended match #}
+                                    <button class="btn btn-sm btn-dark ml-5 col-auto" type="submit" value="Shrani">
+                                        Shrani
+                                    </button>
                                 </div>
-                                <label class="col form-label"
-                                       for="{{ first_team_score_id }}">{{ form.instance.first_team }}</label>
-                                {% render_field form.first_team_score id=first_team_score_id %}
-                                <label class="col form-label"
-                                       for="{{ second_team_score_id }}">{{ form.instance.second_team }}</label>
-                                {% render_field form.second_team_score id=second_team_score_id %}
-                                {# TODO: flag for suspended match #}
-                                <button class="btn btn-sm btn-dark ml-5 col-auto" type="submit" value="Shrani"
-                                        {% if not profile.is_admin and form.instance|saving_disabled %}
-                                        disabled {% endif %}>Shrani
-                                </button>
+                                {% if write_scorers_enabled %}
+                                    <div class="d-flex pl-4 pt-2 row w-100">
+                                        <a class="badge badge-light" data-toggle="collapse" role="button"
+                                           href="#collapseExample{{ form_id }}" aria-expanded="false"
+                                           aria-controls="collapseExample{{ form_id }}">
+                                            Vpiši strelce
+                                        </a>
+                                    </div>
+                                    <div class="collapse pl-2 pt-2 w-100" id="collapseExample{{ form_id }}">
+                                        <div class="d-flex flex-row">
+                                            <div id="first_team_scorers" class="w-50 mr-4">
+                                                {% for first_team_scorers in form.get_first_team_scorers_fields %}
+                                                    <div id="{{ first_team_scorers.name }}" class="mr-5">
+                                                        <div class="row" id="{{ first_team_scorers.name }}">
+                                                            <div class="col">
+                                                                {% render_field first_team_scorers class='p-1 w-100 h-100' placeholder='Ime priimek' %}
+                                                            </div>
+                                                        </div>
+                                                        <br/>
+                                                    </div>
+
+                                                {% endfor %}
+                                                <button type="button" class="btn btn-outline-dark add-player" name="{{ form.instance.id }}_first_team_scorer">+</button>
+                                                <button type="button" class="btn btn-outline-danger remove-player" name="{{ form.instance.id }}_first_team_scorer">-</button>
+                                            </div>
+                                            <div id="second_team_scorers" class="w-50 mr-4">
+                                                <div class="pl-3">
+                                                    {% for second_team_scorers in form.get_second_team_scorers_fields %}
+                                                        <div id="{{ second_team_scorers.name }}" class="mr-5">
+                                                            <div class="row">
+                                                                <div class="col">
+                                                                    {% render_field second_team_scorers class='p-1 w-100 h-100' placeholder='Ime priimek' %}
+                                                                </div>
+                                                            </div>
+                                                            <br/>
+                                                        </div>
+                                                    {% endfor %}
+                                                    <button type="button" class="btn btn-outline-dark add-player" name="{{ form.instance.id }}_second_team_scorer">+
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-danger remove-player" name="{{ form.instance.id }}_second_team_scorer">-
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
                             </div>
                         </form>
                     {% endwith %}
@@ -43,11 +92,80 @@
                 <hr/>
             {% endfor %}
             {% if profile.is_admin %}
-                {# TODO: url #}
                 <a class="text-dark nounderline p-2" href="{% url 'sunday_league:round' round_id=selected_round.id %}"><b>Uredi podatke kroga</b></a>
                 <br/>
             {% endif %}
             <a class="text-dark nounderline p-2" href="{% url 'sunday_league:dashboard' %}"><b>Nazaj</b></a>
         </div>
     </div>
+    <script type="text/javascript">
+        $(".add-player").click(function () {
+            add_new_scorer(document.getElementsByName(this.name)[0])
+        });
+
+        $(".remove-player").click(function () {
+            remove_player(document.getElementsByName(this.name)[0])
+        });
+
+        function add_new_scorer(clicked_button) {
+            const button_name = clicked_button.name
+            const is_first_team = button_name.includes('first_team')
+            const match_id = parseInt(button_name.substring(0, button_name.indexOf("_")))
+
+            {# Get first/second scorer count hiden input field #}
+            const scorers_count = is_first_team ? document.getElementById(match_id + '_first_team_scorers_count') : document.getElementById(match_id + '_second_team_scorers_count')
+            {# First input must exists #}
+            let scorer_row = document.getElementById(button_name + '_0')
+
+            {# Clone and increase index #}
+            let parent = clicked_button.parentElement
+            let new_scorer_row = scorer_row.cloneNode(true)
+            let scorer_row_id = new_scorer_row.id
+            let new_row_id = chenge_scorer_index(scorer_row_id, scorers_count.value)
+
+            {# Change some field on new  #}
+            let input = new_scorer_row.getElementsByTagName('input')[0]
+            let datalist = new_scorer_row.getElementsByTagName('datalist')[0]
+            let row = new_scorer_row.getElementsByTagName('div')[0]
+
+            new_scorer_row.id = new_row_id
+            row.id = new_row_id
+            datalist.id = 'list__' + new_row_id
+
+            input.id = 'id_' + new_row_id
+            input.name = new_row_id
+            input.value = ''
+
+            {# Increase count value #}
+            scorers_count.value = parseInt(scorers_count.value) + 1
+
+            {# List attribute is read-only, so we need to change id by hand #}
+            input.setAttribute('list', datalist.id)
+            parent.insertBefore(new_scorer_row, clicked_button)
+        }
+
+        function chenge_scorer_index(row_id, new_index) {
+            return row_id.substring(0, row_id.lastIndexOf("_")) + '_' + new_index
+        }
+
+        function remove_player(clicked_button) {
+            const button_name = clicked_button.name
+            const is_first_team = button_name.includes('first_team')
+            const match_id = parseInt(button_name.substring(0, button_name.indexOf("_")))
+
+            {# Get first/second scorer count hiden input field #}
+            const scorers_count = is_first_team ? document.getElementById(match_id + '_first_team_scorers_count') : document.getElementById(match_id + '_second_team_scorers_count')
+            {# Can't remove all scorers #}
+            if (scorers_count.value == 1) {
+                return
+            }
+
+            scorers_count.value = parseInt(scorers_count.value) - 1
+            let last_scorer_row = document.getElementById(button_name + '_' + scorers_count.value)
+
+            let parent = clicked_button.parentElement
+            parent.removeChild(last_scorer_row)
+        }
+
+    </script>
 {% endblock %}

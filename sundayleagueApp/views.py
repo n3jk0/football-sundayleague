@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from sundayleagueApp.models import *
 from sundayleagueApp.forms import *
+from sundayleagueApp.services import SystemSettingsUtils
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import *
@@ -14,6 +15,7 @@ from django.contrib.auth.decorators import login_required
 
 import services.FixturesService as FixturesServices
 import services.ResultsService as ResultsService
+from sundayleagueApp import constants
 from django.shortcuts import redirect
 
 import datetime
@@ -114,8 +116,8 @@ def fixtures(request, league):
     return render(request, 'fixtures.html',
                   {'matches': matches_group_by_rounds, 'rounds': rounds_group_by_league, 'all_rounds': all_rounds,
                    'table_rows': table_rows, 'selected_round': selected_round, 'selected_league': league,
-                   'top_scorers': top_scorers,
-                   'goals_by_match': goals_by_match})
+                   'top_scorers': top_scorers, 'goals_by_match': goals_by_match,
+                   'write_scorers_enabled': SystemSettingsUtils.get_bool_value(constants.WRITE_SCORERS_ENABLED)})
 
 
 @require_GET
@@ -181,7 +183,11 @@ def modify_matches(request, round_id=-1):
             return redirect('dashboard')
         matches_for_round = Match.objects.filter(round=selected_round).order_by('time').all()
         forms = [MatchForm(profile, disabled=(not profile.is_admin and saving_disabled(m)), instance=m)for m in matches_for_round]
-        return render(request, 'modify-matches.html', {'profile':profile, 'selected_round': selected_round, 'matches': matches_for_round, 'forms': forms})
+
+        return render(request, 'modify-matches.html',
+                      {'profile': profile, 'selected_round': selected_round, 'matches': matches_for_round,
+                       'write_scorers_enabled': SystemSettingsUtils.get_bool_value(constants.WRITE_SCORERS_ENABLED),
+                       'forms': forms})
 
 
 @require_http_methods(["GET", "POST"])
@@ -318,7 +324,7 @@ def players(request):
         return redirect('sunday_league:dashboard')
 
     players_by_league = {}
-    for player in Player.objects.order_by('-goals').all():
+    for player in Player.objects.filter(team__isnull=False).order_by('-goals').all():
         # Use string for league due to django template restriction
         players_by_league.setdefault(str(player.team.league), []).append(player)
 
