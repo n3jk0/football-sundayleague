@@ -149,7 +149,8 @@ def information(request, league=1):
 def dashboard(request):
     profile = request.user.profile
     user_team = profile.team
-    editable_rounds = Round.objects.all() if profile.is_admin else Round.objects.filter(home_team=user_team).all()
+    editable_rounds = Round.objects.order_by('league_number', 'date').all() if profile.is_admin else Round.objects.filter(
+        home_team=user_team).order_by('league_number', 'date').all()
     rounds_by_league = {}
     for round in editable_rounds:
         rounds_by_league.setdefault(round.league_number, []).append(round)

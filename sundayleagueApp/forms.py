@@ -16,34 +16,37 @@ class MatchForm(forms.ModelForm):
         fields = {'status', 'first_team_score', 'second_team_score'}
 
     def __init__(self, profile, disabled=False, *args, **kwargs):
-        super(MatchForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.first_team_scorers_count = 0
         self.second_team_scorers_count = 0
         self.match_id = self.instance.id
 
         if (SystemSettingsUtils.get_bool_value(constants.WRITE_SCORERS_ENABLED)):
-            first_team_scorers_count_field_name = str(self.match_id) + '_first_team_scorers_count'
-            second_team_scorers_count_field_name = str(self.match_id) + '_second_team_scorers_count'
+            if self.data:
+                pass
+            else:
+                first_team_scorers_count_field_name = str(self.match_id) + '_first_team_scorers_count'
+                second_team_scorers_count_field_name = str(self.match_id) + '_second_team_scorers_count'
 
-            self.fields['first_team_scorers_count_field'].widget.attrs['id'] = first_team_scorers_count_field_name
-            self.fields['second_team_scorers_count_field'].widget.attrs['id'] = second_team_scorers_count_field_name
+                self.fields['first_team_scorers_count_field'].widget.attrs['id'] = first_team_scorers_count_field_name
+                self.fields['second_team_scorers_count_field'].widget.attrs['id'] = second_team_scorers_count_field_name
 
-            goals_by_match = models.MatchGoals.objects.filter(match=self.instance)
-            first_team_goals = goals_by_match.filter(Q(team=self.instance.first_team) | Q(team__isnull=True)).all()
-            second_team_goals = goals_by_match.filter(Q(team=self.instance.second_team) | Q(team__isnull=True)).all()
+                goals_by_match = models.MatchGoals.objects.filter(match=self.instance)
+                first_team_goals = goals_by_match.filter(Q(team=self.instance.first_team) | Q(team__isnull=True)).all()
+                second_team_goals = goals_by_match.filter(Q(team=self.instance.second_team) | Q(team__isnull=True)).all()
 
-            for goalData in first_team_goals:
-                self.add_new_first_team_scorer_field(goalData)
+                for goalData in first_team_goals:
+                    self.add_new_first_team_scorer_field(goalData)
 
-            for goalData in second_team_goals:
-                self.add_new_second_team_scorer_field(goalData)
+                for goalData in second_team_goals:
+                    self.add_new_second_team_scorer_field(goalData)
 
-            # Set empty input
-            self.add_new_first_team_scorer_field()
-            self.add_new_second_team_scorer_field()
+                # Set empty input
+                self.add_new_first_team_scorer_field()
+                self.add_new_second_team_scorer_field()
 
-            self.fields['first_team_scorers_count_field'].initial = self.first_team_scorers_count
-            self.fields['second_team_scorers_count_field'].initial = self.second_team_scorers_count
+                self.fields['first_team_scorers_count_field'].initial = self.first_team_scorers_count
+                self.fields['second_team_scorers_count_field'].initial = self.second_team_scorers_count
 
         if disabled:
             for field in self.fields.values():
@@ -88,17 +91,17 @@ class MatchForm(forms.ModelForm):
         first_team_goals = match.matchgoals_set.all().delete()
         players = models.Player.objects.annotate(name=Concat('first_name', Value(' '), 'family_name', output_field=CharField()))
 
-        for field_name in self.cleaned_data:
-            if 'first_team_scorer' in field_name and 'count' not in field_name and self.cleaned_data[field_name]:
-                player_name = self.cleaned_data[field_name]
+        for field_name in self.data:
+            if 'first_team_scorer' in field_name and 'count' not in field_name and self.data[field_name]:
+                player_name = self.data[field_name]
                 player = self.get_or_create_player(player_name, players)
-
-                models.MatchGoals.objects.create(match=match, team=match.first_team,scorer=player)
-            if 'second_team_scorer' in field_name and 'count' not in field_name and self.cleaned_data[field_name]:
-                player_name = self.cleaned_data[field_name]
+                goal = models.MatchGoals.objects.create(match=match, team=match.first_team,scorer=player)
+                print(goal,  "saved!")
+            if 'second_team_scorer' in field_name and 'count' not in field_name and self.data[field_name]:
+                player_name = self.data[field_name]
                 player = self.get_or_create_player(player_name, players)
-
-                models.MatchGoals.objects.create(match=match, team=match.second_team,scorer=player)
+                goal = models.MatchGoals.objects.create(match=match, team=match.second_team,scorer=player)
+                print(goal,  "saved!")
 
         return super(MatchForm, self).save(commit=commit)
 

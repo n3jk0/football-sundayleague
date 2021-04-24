@@ -141,7 +141,7 @@ class MatchGoals(models.Model):
                                   related_name='assistant')
 
     def __str__(self):
-        return "{} ({})".format(self.scorer.name(), self.match)
+        return "{} ({})".format(self.scorer.name, self.match)
 
 
 class Information(models.Model):
