@@ -118,7 +118,7 @@ class TableRow(models.Model):
 
 
 class Player(models.Model):
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, blank=True, null=True)
     position = models.CharField(max_length=3, choices=PLAYER_POSITIONS, default='GK')
     first_name = models.CharField(max_length=255)
     family_name = models.CharField(max_length=255)
