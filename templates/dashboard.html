@@ -44,8 +44,9 @@
             {% else %}
                 </div>
             {% endif %}
-            {% if forloop.counter0|add:1 < rounds|length %}
-                <hr class="bg-light"/>
+            <hr class="bg-light"/>
+            {% if forloop.counter0|add:1 == rounds|length %}
+                <a class="text-white nounderline p-2" href="{% url 'sunday_league:home' %}"><b>Nazaj</b></a>
             {% endif %}
         {% endfor %}
     <br/>
