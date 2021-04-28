@@ -4,6 +4,7 @@ import re
 from sundayleagueApp.models import *
 from services.CommonService import *
 import datetime
+import logging
 from os import walk
 from difflib import SequenceMatcher
 
@@ -19,6 +20,7 @@ def get_fixtures_text():
     files = File.objects.filter(is_fixture=True, already_read=False).all()
     for file in files:
         return file.text_content if bool(file.text_content) else read_file(file)
+    logging.error("No fixtures files was found.")
     return ""
 
 
@@ -27,7 +29,7 @@ def get_fixtures_text_by_id(file_id):
     if file.exists():
         file = file.first()
     else:
-        print("File " + file_id + " doesn't exists.")
+        logging.error("File {} doesn't exists.".format(file_id))
         return None
     return file.text_content if bool(file.text_content) else read_file(file)
 
@@ -36,7 +38,9 @@ def save_teams(fixtures_text=""):
     if not fixtures_text:
         fixtures_text = get_fixtures_text()
     teams = re.findall('[0-9]+[\.][\n][0-9]*[A-Ž -]+[0-9]*', fixtures_text)
-    saved_teams = [Team.objects.get_or_create(name=team.split("\n")[1]) for team in teams]
+    # Added [0] to return only saved object (without created flag)
+    saved_teams = [Team.objects.get_or_create(name=team.split("\n")[1])[0] for team in teams]
+    logging.debug("Teams {} found or saved.".format(saved_teams))
     return saved_teams
 
 
@@ -55,17 +59,25 @@ def save_rounds(fixtures_text=""):
     prev_round = -1
     current_league = 1
     team_names = [team.name for team in Team.objects.all()]
+    logging.debug("Start saving rounds from fixture file.")
     for i, block in enumerate(rounds_blocks):
         lines = block.split("\n")
+        logging.debug("Round data: {}".format(lines))
         round_number = int(re.findall("[0-9]+", lines[0])[0])
         if round_number < prev_round:
+            logging.debug("League number changed from {} to {}".format(current_league, current_league + 1))
             current_league += 1
         date = datetime.datetime.strptime(lines[1], '%d.%m.%Y')
         team_name = find_almost_same_name(team_names, lines[3])
         home_team = Team.objects.get(name=team_name)
-        Round.objects.get_or_create(round_number=round_number, place=lines[5], date=date, league_number=current_league,
-                                    home_team=home_team)
-
+        round, created = Round.objects.get_or_create(round_number=round_number, league_number=current_league)
+        if created:
+            round.place = lines[5]
+            round.date = date
+            round.home_team = home_team
+            round.save()
+            logging.info("Round {} for league {} already exists. Place, date and home_team was changed.".format(round_number, current_league))
+        logging.info("Round: {} saved.".format(round))
         prev_round = round_number
     return "DONE"
 
@@ -79,6 +91,8 @@ def save_matches(fixtures_text=""):
     time_id = 0
     current_league = 1
     team_names = [team.name for team in Team.objects.all()]
+    logging.debug("Saving matches from fixture file.")
+    # TODO: Rewrite code without LEAGUE_THRESHOLD and ROUND_THRESHOLD
     for i, match in enumerate(matches_blocks):
         index = fixtures_text.index(match, prev_index)
         if index - prev_index > LEAGUE_THRESHOLD:
@@ -92,6 +106,7 @@ def save_matches(fixtures_text=""):
         prev_index = index
         match = re.sub(r'\n', '', match)
         match_split = match.split(":")
+        logging.debug("Match data: {}".format(match_split))
 
         first_team_name = find_almost_same_name(team_names, match_split[0])
         first_team = Team.objects.get(name=first_team_name)
@@ -106,10 +121,11 @@ def save_matches(fixtures_text=""):
             second_team.save()
 
         time = datetime.datetime.strptime(MATCH_HOURS[time_id], '%H:%M')
-        print(round_num, current_league, first_team_name, second_team_name)
         football_round = Round.objects.get(round_number=round_num, league_number=current_league)
+        logging.debug("Round {} found.".format(football_round))
 
-        Match.objects.get_or_create(first_team=first_team, second_team=second_team, time=time, round=football_round)
+        m, created = Match.objects.get_or_create(first_team=first_team, second_team=second_team, time=time, round=football_round)
+        logging.info("Match {} {}.".format(m, "saved" if created else "already exists"))
         time_id += 1
 
     return "DONE"
@@ -118,14 +134,14 @@ def save_matches(fixtures_text=""):
 def save_fixtures():
     fixtures_text = get_fixtures_text()
     saved_teams = save_teams(fixtures_text)
-    print("{} ekip je bilo shranjenih.".format(len(saved_teams)))
+    logging.info("{} teams was saved.".format(len(saved_teams)))
     save_rounds(fixtures_text)
     save_matches(fixtures_text)
 
 def save_fixtures_for_file(file_id=-1):
     fixtures_text = get_fixtures_text_by_id(file_id)
     saved_teams = save_teams(fixtures_text)
-    print("{} ekip je bilo shranjenih.".format(len(saved_teams)))
+    logging.info("{} teams was saved.".format(len(saved_teams)))
     save_rounds(fixtures_text)
     save_matches(fixtures_text)
     return True

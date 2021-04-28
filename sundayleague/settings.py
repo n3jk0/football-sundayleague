@@ -143,5 +143,40 @@ MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+LOGGING_LEVEL = 'INFO'
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'loggers': {
+        '': {
+            # Add 'file' handler to 'handlers' to enable loging to file
+            'handlers': ['console'],
+            'level': LOGGING_LEVEL
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': LOGGING_LEVEL,
+            'class': 'logging.StreamHandler',
+            'formatter' : 'simple'
+        },
+        'file': {
+            'level': LOGGING_LEVEL,
+            'class': 'logging.FileHandler',
+            'filename': './Logs/server.log',
+            'formatter' : 'simple'
+        }
+    },
+    'formatters': {
+        'simple': {
+            'format': '{asctime} {levelname} [{filename}:{lineno}] {message}',
+            'style': '{',
+        },
+    }
+}
+
+import logging.config
+logging.config.dictConfig(LOGGING)
+
 # Activate Django-Heroku.
 django_heroku.settings(locals())

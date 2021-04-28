@@ -1,13 +1,11 @@
 import docx2txt
 from io import BytesIO
-import re
+import re, logging
 
 from services.CommonService import *
 from services.FixturesService import find_almost_same_name
 from sundayleagueApp.models import *
 
-ROUND_THRESHOLD = 65
-LEAGUE_THRESHOLD = 200
 TEAM_NAME_SIMILARITY = 0.7
 
 
@@ -15,6 +13,7 @@ def get_results_text():
     files = File.objects.filter(already_read=False, is_fixture=False).all()
     for file in files:
         return file.text_content if bool(file.text_content) else read_file(file)
+    logging.error("No resutls files was found.")
     return ""
 
 
@@ -23,7 +22,7 @@ def get_results_text_by_id(file_id):
     if file.exists():
         file = file.first()
     else:
-        print("File", file_id, "doesn't exists.")
+        logging.error("File {} doesn't exists.".format(file_id))
         return None
 
     return file.text_content if bool(file.text_content) else read_file(file)
@@ -35,6 +34,7 @@ def get_result_from_text(results_text):
     team_names = [team.name for team in Team.objects.all()]
     league_num = 1
     saved_results = []
+    logging.debug("Start reading results from results file.")
     for i in range(len(league_indexes)):
         if i + 1 >= len(league_indexes):
             league_block = results_text[league_indexes[i]:]
@@ -52,19 +52,26 @@ def get_result_from_text(results_text):
             # find number in first line
             round_num = int(re.findall('[0-9]+', round_block.split("\n")[0])[0])
             r = Round.objects.get(round_number=round_num, league_number=league_num)
+            logging.debug("{} round was found.".format(r))
             results_for_round = re.findall("[0-9A-Ž -.]+\n:\n[0-9A-Ž -.]+\n[0-9]+:[0-9]+[(b.b.)]*", round_block)
             for result_per_round in results_for_round:
                 lines = result_per_round.split("\n")
+                logging.debug("Results data: {}".format(lines))
                 matches_in_round = Match.objects.filter(round=r)
                 first_team = Team.objects.get(name=find_almost_same_name(team_names, lines[0]))
                 second_team = Team.objects.get(name=find_almost_same_name(team_names, lines[2]))
-                match = matches_in_round.get(first_team=first_team, second_team=second_team)
+                try:
+                    match = matches_in_round.get(first_team=first_team, second_team=second_team)
+                except Match.DoesNotExist:
+                    logging.warning("Match with first_team {} and second_team {} wasn't found. Result will bi skipped.")
+                    continue
                 result = re.split(':', lines[3])
                 match.first_team_score = result[0]
                 if str(result[1]).endswith('(b.b.)'):
                     match.is_surrendered = True
                     result[1] = result[1].split('(b.b.)')[0]
                 match.second_team_score = result[1]
+                logging.debug("Result for match {} updated".format(match))
                 saved_results.append(match)
                 match.status = Match.MatchStatus.CONFIRMED
         league_num += 1
@@ -89,12 +96,14 @@ def save_results_for_file(file_id):
 
 def save_results(matches):
     [match.save() for match in matches]
+    logging.info("{} saved.".format(matches))
 
 
 def update_table():
     matches = Match.objects.exclude(first_team_score__isnull=True).exclude(second_team_score__isnull=True).all()
     if len(matches) < 1:
         empty_table()
+        logging.warning("No matches found.")
         return {}
 
     matches_grouped_by_team = {}
@@ -124,6 +133,7 @@ def update_table():
         matches_for_team = matches_grouped_by_team.get(team.id)
         if matches_for_team is None:
             row.save()
+            logging.debug("Empty row saved. No matches for team {}".format(team))
             continue
         for match in matches_for_team:
             if match.first_team_id == team.id:
@@ -135,8 +145,8 @@ def update_table():
                 row.goals_for += match.second_team_score
                 row.goals_against += match.first_team_score
             else:
-                print("Shouldn't get there ({})".format(team))
-                return
+                # Shouldn't get there
+                continue
 
             row.match_played += 1
             # res > 0 win ; res == 0 draw ; res < 0 loss
@@ -155,6 +165,7 @@ def update_table():
                 elif row.penalty_points == -1:
                     row.penalty_points = -3
         row.points += row.penalty_points
+        logging.debug("Table row {} for team {} saved.".format(row, team))
         row.save()
     return response
 
@@ -163,7 +174,6 @@ def empty_table():
     teams = Team.objects.all()
     for team in teams:
         row, created = TableRow.objects.get_or_create(team=team, league=team.league)
-        print(row, created)
         # clean
         if not created:
             row.match_played = 0
@@ -200,7 +210,7 @@ def save_information(results_text):
             end_table = table.rfind("\n:") + 1  # Must be +1 so that new_line contains in table
             table = table[:end_table]
             index_of_last_colon = table_indexes[table_index] + end_table
-            # Replaca last ':' with new_line
+            # Replace last ':' with new_line
             info_text = info_text[:index_of_last_colon] + '\n' + info_text[index_of_last_colon + 1:]
             old_tables.append(table)
 
@@ -213,6 +223,7 @@ def save_information(results_text):
         info_text = info_text.strip()
         information = Information(info=info_text)
         information.save()
+        logging.info("Information {} saved.".format(information))
 
 
 def replace_with_html_table(info_text, table):

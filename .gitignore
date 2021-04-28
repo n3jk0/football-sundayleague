@@ -106,5 +106,6 @@ venv.bak/
 .idea/*
 media/*
 staticfiles/*
+Logs/server.log
 
 sundayleagueApp/migrations/heroku.logs
