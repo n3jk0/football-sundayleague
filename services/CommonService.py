@@ -1,11 +1,11 @@
 from io import BytesIO
 import docx2txt
-import re
+import re, logging
 
 
 def read_file(file):
     with file.file_content.open(mode='rb') as f:
-        print("Start reading file", file.file_content.name)
+        logging.info("Start reading file: {}".format(file.file_content.name))
         doc = BytesIO(f.read())
         text = docx2txt.process(doc)
         text = preprocess(text)
@@ -13,6 +13,8 @@ def read_file(file):
         file.already_read = True
         file.text_content = text
         file.save()
+
+        logging.info("File {} read.".format(file.file_content.name))
         return text
 
 

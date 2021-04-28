@@ -19,6 +19,7 @@ from sundayleagueApp import constants
 from django.shortcuts import redirect
 
 import datetime
+import logging
 
 LEAGUE_PREFIX = 'league_'
 
@@ -42,6 +43,7 @@ def index(request):
     all_matches = Match.objects.order_by("time").all()
     matches_group_by_rounds = {}
     [matches_group_by_rounds.setdefault(m.round_id, []).append(m) for m in all_matches]
+    logging.info('Test')
     # TODO: goals by match
     return render(request, 'fixtures.html',
                   {'matches': matches_group_by_rounds, 'rounds': rounds_group_by_league, 'all_rounds': [],
@@ -177,10 +179,10 @@ def modify_matches(request, round_id=-1):
         try:
             selected_round = Round.objects.get(id=round_id)
             if not profile.is_admin and selected_round.home_team != profile.team:
-                print('User:', profile.user, "doesn't have privileges for round", selected_round)
+                logging.warning("User: {} doesn't have privileges for round {}".format(profile.user, selected_round))
                 return redirect('dashboard')
         except Round.DoesNotExist:
-            print('Round with id', round_id, "doesn't exists")
+            logging.warning('Round with id ' + round_id + " doesn't exists")
             return redirect('dashboard')
         matches_for_round = Match.objects.filter(round=selected_round).order_by('time').all()
         forms = [MatchForm(profile, disabled=(not profile.is_admin and saving_disabled(m)), instance=m)for m in matches_for_round]
