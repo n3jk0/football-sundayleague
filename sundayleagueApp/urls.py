@@ -32,7 +32,10 @@ urlpatterns = [
   url(r'^player/$', views.player, name='player'),
   url(r'^round/(?P<round_id>\d+)/$', views.round, name='round'),
   url(r'^round/$', views.round, name='round'),
-  url(r'^players/$', views.players, name='players')
+  url(r'^players/$', views.players, name='players'),
+  url(r'^teams/$', views.teams, name='all_teams'),
+  url(r'^team/(?P<team_id>\d+)/$', views.team, name='team'),
+  url(r'^team/$', views.team, name='team')
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # urlpatterns += staticfiles_urlpatterns()

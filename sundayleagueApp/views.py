@@ -365,6 +365,45 @@ def round(request, round_id=-1):
 
     return render(request, "round.html", {"form": form})
 
+
+@require_GET
+@login_required(login_url="/login/")
+def teams(request):
+    profile = request.user.profile
+    if not profile.is_admin:
+        return redirect('sunday_league:dashboard')
+
+    teams_by_league = {}
+    for team in Team.objects.filter(league__gt=0).order_by('league', 'name').all():
+        # Use string for league due to django template restriction
+        teams_by_league.setdefault(str(team.league), []).append(team)
+    return render(request, "list_of_teams.html", {"teams_by_league": teams_by_league})
+
+
+@require_http_methods(["GET", "POST"])
+@login_required(login_url="/login/")
+def team(request, team_id=-1):
+    profile = request.user.profile
+    if not profile.is_admin:
+        return redirect('sunday_league:dashboard')
+
+    if request.method == 'GET':
+        form = TeamForm()
+        if int(team_id) > 0:
+            form = TeamForm(instance=Team.objects.get(id=team_id))
+
+    elif request.method == 'POST':
+        form = TeamForm(data=request.POST)
+        if int(team_id) > 0:
+            team = Team.objects.get(id=team_id)
+            form = TeamForm(instance=team, data=request.POST)
+        if form.is_valid():
+            team = form.save()
+            messages.success(request, "Ekipa je shranjena.")
+            return redirect('sunday_league:team', team_id=team.id)
+
+    return render(request, "team.html", {"form": form})
+
 # TODO: remove
 # DEPRECATED: Method called from django admin
 @csrf_exempt

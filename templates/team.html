@@ -1,0 +1,23 @@
+{% extends 'base/base-with-header.html' %}
+{% load widget_tweaks %}
+
+{% block title %} Uredi ekipo {% endblock %}
+
+{% block content %}
+    <div class="shadow rounded p-3 bg-light">
+        {% include 'components/messages.html' %}
+        <form class="d-flex flex-column" method="post">
+            <h3>Uredi ekipo</h3>
+            {% csrf_token %}
+
+            <label class="mb-0" for="player_first_name">Ime</label>
+            {% render_field form.name id='team_name' class='form-control mb-2' %}
+            <label class="mb-0" for="player_first_name">Liga</label>
+            {% render_field form.league id='league' class='form-control mb-2' %}
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-dark" type="submit" value="Shrani">Shrani</button>
+            </div>
+        </form>
+        <a class="text-dark nounderline p-2" href="{% url 'sunday_league:all_teams' %}"><b>Nazaj</b></a>
+    </div>
+{% endblock %}

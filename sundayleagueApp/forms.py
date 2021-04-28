@@ -157,3 +157,9 @@ class RoundForm(forms.ModelForm):
     class Meta:
         model = models.Round
         fields = '__all__'
+
+
+class TeamForm(forms.ModelForm):
+    class Meta:
+        model = models.Team
+        fields = '__all__'

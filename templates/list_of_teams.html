@@ -1,0 +1,25 @@
+{% extends 'base/base-with-header.html' %}
+{% load widget_tweaks %}
+
+{% block title %} Seznam ekip {% endblock %}
+
+{% block content %}
+    <div class="shadow rounded p-3 bg-light">
+        <div class="d-flex flex-column">
+            <a class="text-dark nounderline p-2" href="{% url 'sunday_league:dashboard' %}"><b>Nazaj</b></a>
+        </div>
+        <h3 class="text-center"><b>Ekipe:</b></h3>
+        {% for league in '1234'|make_list %}
+            <div class="separator">Liga {{ league }}</div>
+            {% for team in teams_by_league|get_item:league %}
+                <div class="row p-1 w-100 ml-0" style="{% if forloop.counter0|divisibleby:2 %}background-color: rgba(0,0,0,.05);{% endif %}">
+                    <div class="col pt-2"><a class="nounderline text-dark" href="{% url 'sunday_league:team' team_id=team.id %}">{{ team }}</a></div>
+                </div>
+            {% endfor %}
+        {% endfor %}
+        <hr/>
+        <div class="d-flex flex-column">
+            <a class="text-dark nounderline p-2" href="{% url 'sunday_league:dashboard' %}"><b>Nazaj</b></a>
+        </div>
+    </div>
+{% endblock %}

@@ -37,7 +37,7 @@ def get_fixtures_text_by_id(file_id):
 def save_teams(fixtures_text=""):
     if not fixtures_text:
         fixtures_text = get_fixtures_text()
-    teams = re.findall('[0-9]+[\.][\n][0-9]*[A-Ž -]+[0-9]*', fixtures_text)
+    teams = re.findall('[0-9]+[\.][\n][0-9]*[A-Ž -]+[0-9A-Ž]*', fixtures_text)
     # Added [0] to return only saved object (without created flag)
     saved_teams = [Team.objects.get_or_create(name=team.split("\n")[1])[0] for team in teams]
     logging.debug("Teams {} found or saved.".format(saved_teams))

@@ -5,6 +5,9 @@
 
 {% block content %}
     <div class="shadow rounded p-3 bg-light">
+        <div class="d-flex flex-column">
+            <a class="text-dark nounderline p-2" href="{% url 'sunday_league:dashboard' %}"><b>Nazaj</b></a>
+        </div>
         <h3 class="text-center"><b>Strelci</b></h3>
         <form method="post">
             {% csrf_token %}
