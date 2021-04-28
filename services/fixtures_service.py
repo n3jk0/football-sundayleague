@@ -2,7 +2,7 @@ import docx2txt
 from io import BytesIO
 import re
 from sundayleagueApp.models import *
-from services.CommonService import *
+from services.common_service import *
 import datetime
 import logging
 from os import walk

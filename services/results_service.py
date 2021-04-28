@@ -2,8 +2,8 @@ import docx2txt
 from io import BytesIO
 import re, logging
 
-from services.CommonService import *
-from services.FixturesService import find_almost_same_name
+from services.common_service import *
+from services.fixtures_service import find_almost_same_name
 from sundayleagueApp.models import *
 
 TEAM_NAME_SIMILARITY = 0.7

@@ -13,8 +13,8 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 
-import services.FixturesService as FixturesServices
-import services.ResultsService as ResultsService
+import services.fixtures_service as FixturesServices
+import services.results_service as ResultsService
 from sundayleagueApp import constants
 from django.shortcuts import redirect
 

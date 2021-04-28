@@ -4,7 +4,7 @@ from django.contrib.auth.models import User, Group
 
 from .models import *
 from .views import results
-import services.ResultsService as ResultsService
+import services.results_service as ResultsService
 from django.conf.urls import url
 
 
