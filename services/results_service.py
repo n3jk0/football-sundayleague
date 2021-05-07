@@ -39,7 +39,7 @@ def get_result_from_text(results_text):
         if i + 1 >= len(league_indexes):
             league_block = results_text[league_indexes[i]:]
             if len(information_index) > 0:
-                league_block = results_text[league_indexes[i]:league_indexes[0]]
+                league_block = results_text[league_indexes[i]:information_index[0]]
         else:
             league_block = results_text[league_indexes[i]:league_indexes[i + 1]]
 

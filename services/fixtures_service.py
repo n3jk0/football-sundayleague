@@ -70,8 +70,9 @@ def save_rounds(fixtures_text=""):
         date = datetime.datetime.strptime(lines[1], '%d.%m.%Y')
         team_name = find_almost_same_name(team_names, lines[3])
         home_team = Team.objects.get(name=team_name)
-        round, created = Round.objects.get_or_create(round_number=round_number, league_number=current_league)
-        if created:
+        round, created = Round.objects.get_or_create(round_number=round_number, league_number=current_league,
+                                                     defaults={'date': date, 'home_team': home_team, 'place': lines[5]})
+        if not created:
             round.place = lines[5]
             round.date = date
             round.home_team = home_team
